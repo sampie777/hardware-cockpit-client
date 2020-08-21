@@ -17,6 +17,11 @@ object ConnectorRegister {
         connectors.remove(connector)
     }
 
+    fun unregisterAll() {
+        logger.info("Unregistering all connectors")
+        connectors.clear()
+    }
+
     fun valueUpdate(name: String, value: Any?) {
         logger.info("Sending value update to connectors")
         try {

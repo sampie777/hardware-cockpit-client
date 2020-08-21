@@ -15,13 +15,13 @@ class Button(override val id: Int, override val name: String) : Component {
         return temp
     }
 
-    override fun set(serialValue: ByteArray) {
+    override fun set(newRawValue: Int) {
         if (toggled) {
             logger.info("Button value can only be set to TRUE. To turn button off, use reset().")
             return
         }
 
-        toggled = serialValue[0].toInt() != 0
+        toggled = newRawValue != 0
 
         logger.info("Setting button '$name' value to: $toggled")
         sendValueUpdate()

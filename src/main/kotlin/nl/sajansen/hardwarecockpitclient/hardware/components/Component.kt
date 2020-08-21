@@ -5,7 +5,7 @@ interface Component {
     val name: String
 
     fun value(): Any?
-    fun set(serialValue: ByteArray)
+    fun set(newRawValue: Int)
     fun reset()
     fun sendValueUpdate()
 }

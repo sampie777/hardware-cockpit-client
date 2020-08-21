@@ -1,7 +1,7 @@
 package nl.sajansen.hardwarecockpitclient.connectors
 
 
-import nl.sajansen.hardwarecockpitclient.hardware.HardwareDevice
+import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import java.awt.Robot
 import java.awt.event.InputEvent
 import java.awt.event.KeyEvent
@@ -15,9 +15,9 @@ class KeyboardConnector : Connector {
         println("I must perform an action for '$name' with value: $value")
 
         when (name) {
-            HardwareDevice.NAME_BUTTON_ATC -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_SCROLL_LOCK, 0))
-            HardwareDevice.NAME_BUTTON_LAND -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK))
-            HardwareDevice.NAME_SLIDER_FLAPS -> {
+            CockpitDevice.NAME_BUTTON_ATC -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_SCROLL_LOCK, 0))
+            CockpitDevice.NAME_BUTTON_LAND -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK))
+            CockpitDevice.NAME_SLIDER_FLAPS -> {
                 when (value) {
                     0 -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_0, 0))
                     1 -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_1, 0))

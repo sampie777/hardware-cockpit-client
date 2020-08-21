@@ -1,0 +1,151 @@
+package nl.sajansen.hardwarecockpitclient.hardware.serial
+
+import com.fazecast.jSerialComm.SerialPort
+import com.fazecast.jSerialComm.SerialPortEvent
+import nl.sajansen.hardwarecockpitclient.config.Config
+import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
+import nl.sajansen.hardwarecockpitclient.mocks.TestConnector
+import nl.sajansen.hardwarecockpitclient.mocks.TestHardwareDevice
+import kotlin.test.*
+
+
+class SerialListenerTest {
+
+    private val hardwareDevice = TestHardwareDevice()
+    private val serialListener = SerialListener(hardwareDevice)
+
+    @BeforeTest
+    fun before() {
+        ConnectorRegister.unregisterAll()
+    }
+
+    @Test
+    fun testButtonToggleCommandReachesConnector() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.TOGGLE, 0), 1)
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+
+        val serialPort = SerialPort.getCommPort("test-port")
+        val event = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, data)
+
+        serialListener.serialEvent(event)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_BUTTON_1, testConnector.valueUpdatedWithKey)
+        assertEquals(true, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testValidateMetaForData() {
+        val metaByte = Config.serialMetaBits.shl(0x05).toByte()
+        val result = serialListener.validateMetaForData(arrayListOf(metaByte))
+        assertTrue(result)
+    }
+
+    @Test
+    fun testValidateMetaForDataWithInvalidMetaBit() {
+        val metaByte = (Config.serialMetaBits - 1).shl(0x05).toByte()
+        val result = serialListener.validateMetaForData(arrayListOf(metaByte))
+        assertFalse(result)
+    }
+
+    @Test
+    fun testGetUpdateTypeForData() {
+        val metaByte = SerialDataType.TOGGLE.id.and(0x07).shl(0x02).toByte()
+        val result = serialListener.getUpdateTypeForData(arrayListOf(metaByte))
+        assertEquals(SerialDataType.TOGGLE, result)
+    }
+
+    @Test
+    fun testGetUpdateTypeForDataForInvalidType() {
+        val metaByte = 255.and(0x07).shl(0x02).toByte()
+        val result = serialListener.getUpdateTypeForData(arrayListOf(metaByte))
+        assertNull(result)
+    }
+
+    @Test
+    fun testGetComponentForData() {
+        val idByte = 1.toByte()
+        val result = serialListener.getComponentForData(arrayListOf(0, idByte))!!
+
+        assertEquals(1, result.id)
+        assertEquals(hardwareDevice.components[0], result)
+    }
+
+    @Test
+    fun testGetComponentForDataWithInvalidId() {
+        val idByte = 99.toByte()
+        val result = serialListener.getComponentForData(arrayListOf(0, idByte))
+        assertNull(result)
+    }
+
+    @Test
+    fun testGetValueForDataWithZeroLength() {
+        val metaByte = 0.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0))
+        assertEquals(1, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithLengthOne() {
+        val metaByte = 1.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 0))
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithLengthOne1() {
+        val metaByte = 1.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8))
+        assertEquals(8, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithLengthTwo() {
+        val metaByte = 2.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 0, 0))
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithLengthTwo1() {
+        val metaByte = 2.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 1, 8))
+        assertEquals(264, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithLengthTwo2() {
+        val metaByte = 2.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 1, 0xff.toByte()))
+        assertEquals(511, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithLengthThree() {
+        val metaByte = 3.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 0, 0, 8))
+        assertEquals(8, result)
+    }
+
+    @Test
+    fun testGetValueForDataWithIncorrectLength() {
+        val metaByte = 3.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8))
+        assertNull(result)
+    }
+
+    @Test
+    fun testGetValueForDataWithIncorrectLength1() {
+        val metaByte = 1.and(0x03).toByte()
+        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8, 2, 3, 4))
+        assertEquals(8, result)
+    }
+
+    private fun createMetaByte(updateType: SerialDataType, dataLength: Int): Byte {
+        return (Config.serialMetaBits.shl(0x05)
+                + updateType.id.and(0x07).shl(0x02)
+                + dataLength.and(0x03)).toByte()
+    }
+}

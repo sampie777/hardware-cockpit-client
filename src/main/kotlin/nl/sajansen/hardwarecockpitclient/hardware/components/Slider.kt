@@ -3,7 +3,6 @@ package nl.sajansen.hardwarecockpitclient.hardware.components
 
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
 import nl.sajansen.hardwarecockpitclient.utils.NumberMap
-import java.nio.ByteBuffer
 import java.util.logging.Logger
 
 class Slider(override val id: Int, override val name: String, private val numberMap: NumberMap? = null) : Component {
@@ -17,9 +16,8 @@ class Slider(override val id: Int, override val name: String, private val number
         return temp
     }
 
-    override fun set(serialValue: ByteArray) {
-        value = ByteBuffer.wrap(serialValue).int
-        value = mapValue(value)
+    override fun set(newRawValue: Int) {
+        value = mapValue(newRawValue)
 
         logger.info("Setting slider '$name' value to: $value")
         sendValueUpdate()
