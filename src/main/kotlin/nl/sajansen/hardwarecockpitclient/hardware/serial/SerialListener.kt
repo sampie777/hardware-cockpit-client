@@ -14,7 +14,9 @@ import java.util.logging.Logger
 class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDataListener {
     private val logger = Logger.getLogger(SerialListener::class.java.name)
 
-    private var receivedData = arrayListOf<Byte>()
+    var receivedData = arrayListOf<Byte>()
+    private var metaByte: Int? = null
+    private var dataLength: Int? = null
 
     override fun getListeningEvents(): Int {
         return SerialPort.LISTENING_EVENT_DATA_RECEIVED
@@ -44,7 +46,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     private fun processData(receivedData: ArrayList<Byte>): Boolean {
         logger.info("Processing received serial data: ${receivedData.map { Integer.toHexString(it.toInt()) }}")
 
-        if (!validateMetaForData(receivedData)) {
+        if (metaByte == null && !validateMetaForData(receivedData)) {
             return false
         }
 
@@ -85,6 +87,9 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
             logger.warning("Meta data '$metaBits' is invalid or this isn't the meta data byte")
             return false
         }
+
+        this.metaByte = metaByte
+        this.dataLength = metaByte.and(0x03)
         return true
     }
 
@@ -123,16 +128,16 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
             return 1
         }
 
-        if (dataLength > receivedData.size - 2) {
+        if (2 + dataLength > receivedData.size) {
             logger.warning("Received incorrect data size: ${receivedData.size - 2} != $dataLength")
             return null
         }
 
-        val bytes = receivedData.subList(2, 2 + dataLength)
+        // Copy data bytes from array and pad them with zeros until it's a four-sized array which then can be converted to an Int
+        val bytes = ArrayList(receivedData.subList(2, 2 + dataLength))
         while (bytes.size < 4) {
             bytes.add(0, 0)
         }
-
         val value = ByteBuffer.wrap(bytes.toByteArray()).int
 
         removeFromData(2 + dataLength)
@@ -156,5 +161,10 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
             receivedData.removeAt(0)
         }
         logger.info("Serial data left: ${receivedData.size}")
+    }
+
+    fun clear() {
+        logger.info("Clearing serial data buffer")
+        receivedData.clear()
     }
 }

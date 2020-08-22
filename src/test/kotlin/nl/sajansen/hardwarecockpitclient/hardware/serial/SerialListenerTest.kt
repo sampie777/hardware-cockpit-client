@@ -13,27 +13,12 @@ class SerialListenerTest {
 
     private val hardwareDevice = TestHardwareDevice()
     private val serialListener = SerialListener(hardwareDevice)
+    private val serialPort = SerialPort.getCommPort("test-port")
 
     @BeforeTest
     fun before() {
         ConnectorRegister.unregisterAll()
-    }
-
-    @Test
-    fun testButtonToggleCommandReachesConnector() {
-        val data = byteArrayOf(createMetaByte(SerialDataType.TOGGLE, 0), 1)
-
-        val testConnector = TestConnector()
-        testConnector.enable()
-
-        val serialPort = SerialPort.getCommPort("test-port")
-        val event = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, data)
-
-        serialListener.serialEvent(event)
-
-        assertTrue(testConnector.valueUpdated)
-        assertEquals(hardwareDevice.NAME_BUTTON_1, testConnector.valueUpdatedWithKey)
-        assertEquals(true, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+        serialListener.clear()
     }
 
     @Test
@@ -141,6 +126,152 @@ class SerialListenerTest {
         val metaByte = 1.and(0x03).toByte()
         val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8, 2, 3, 4))
         assertEquals(8, result)
+    }
+
+    @Test
+    fun testButtonToggleCommandReachesConnector() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.TOGGLE, 0), 1)
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+
+        val event = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, data)
+
+        // When
+        serialListener.serialEvent(event)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_BUTTON_1, testConnector.valueUpdatedWithKey)
+        assertEquals(true, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testSliderValueCommandReachesConnector() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+
+        val event = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, data)
+
+        // When
+        serialListener.serialEvent(event)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
+        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testSliderValueCommandReachesConnectorByteByByte() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+
+        // When
+        sendSerialEventWithData(byteArrayOf(data[0]))
+        sendSerialEventWithData(byteArrayOf(data[1], data[2]))
+        sendSerialEventWithData(byteArrayOf(data[3]))
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
+        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testReceivedDataBufferGetsCleared() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
+
+        // When
+        sendSerialEventWithData(byteArrayOf(data[0]))
+        assertEquals(1, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[1], data[2]))
+        assertEquals(3, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[3]))
+        println(serialListener.receivedData)
+        assertEquals(0, serialListener.receivedData.size)
+    }
+
+    @Test
+    fun testDataSurroundedWithIncorrectDataGetsProcessed() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+
+        // When
+        sendSerialEventWithData(byteArrayOf(99))
+        sendSerialEventWithData(byteArrayOf(99, data[0]))
+        sendSerialEventWithData(byteArrayOf(data[1], data[2]))
+        sendSerialEventWithData(byteArrayOf(data[3], 99))
+        sendSerialEventWithData(byteArrayOf(99))
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
+        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testIncorrectDataGetsProcessedUntilValidData() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+        // When
+        sendSerialEventWithData(byteArrayOf(99))
+        assertEquals(1, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(0))
+        assertEquals(1, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[0]))
+        assertEquals(1, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[1]))
+        assertEquals(2, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[2]))
+        assertEquals(3, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[3]))
+        assertEquals(0, serialListener.receivedData.size)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
+        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testDataValueSimilarToMetaByteWillBeTreatedAsValue() {
+        val data = byteArrayOf(
+            createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2),
+            3,
+            createMetaByte(SerialDataType.RELATIVE_VALUE, 2),
+            3
+        )
+
+        val testConnector = TestConnector()
+        testConnector.enable()
+
+        // When
+        sendSerialEventWithData(byteArrayOf(data[0]))
+        assertEquals(1, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[1]))
+        assertEquals(2, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[2]))
+        assertEquals(3, serialListener.receivedData.size)
+        sendSerialEventWithData(byteArrayOf(data[3]))
+        assertEquals(0, serialListener.receivedData.size)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
+        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    private fun sendSerialEventWithData(data: ByteArray) {
+        serialListener.serialEvent(
+            SerialPortEvent(
+                serialPort,
+                SerialPort.LISTENING_EVENT_DATA_RECEIVED,
+                data
+            )
+        )
     }
 
     private fun createMetaByte(updateType: SerialDataType, dataLength: Int): Byte {
