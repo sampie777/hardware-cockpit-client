@@ -15,6 +15,7 @@ fun main(args: Array<String>) {
 
     Config.enableWriteToFile(true)
     Config.load()
+    setupLogging(args)
     Config.save()
 
     KeyboardConnector().enable()
@@ -38,4 +39,14 @@ fun attachExitCatcher() {
             println("Application will be terminated")
         }
     })
+}
+
+private fun setupLogging(args: Array<String>) {
+    val logger = Logger.getLogger("Application")
+    try {
+        LogService.setup(args)
+    } catch (e: Exception) {
+        logger.severe("Failed to initiate logging: $e")
+        e.printStackTrace()
+    }
 }

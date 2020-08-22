@@ -12,6 +12,10 @@ object Config {
 
     var serialMetaBitsValue: Int = 0x05
 
+    // Logging
+    var enableApplicationLoggingToFile: Boolean = true
+    var maxLogFileSize: Int = 1024 * 1024    // 1 MB
+
     fun load() {
         try {
             PropertyLoader.load()
