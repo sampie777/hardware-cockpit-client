@@ -44,7 +44,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     }
 
     private fun processData(receivedData: ArrayList<Byte>): Boolean {
-        logger.info("Processing received serial data: ${receivedData.map { Integer.toHexString(it.toInt()) }}")
+        logger.fine("Processing received serial data: ${receivedData.map { Integer.toHexString(it.toInt()) }}")
 
         if (metaByte == null) {
             if (!validateMetaForData(receivedData)) {
@@ -80,7 +80,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
 
         val metaBits = metaByte.shr(5).and(0x07)
 
-        if (metaBits != Config.serialMetaBits) {
+        if (metaBits != Config.serialMetaBitsValue) {
             logger.warning("Meta data '$metaBits' is invalid or this isn't the meta data byte")
             return false
         }
@@ -109,7 +109,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         }
 
         if (component == null) {
-            logger.warning("Component for id '$id' not found")
+//            logger.warning("Component for id '$id' not found")
         }
         return component
     }
@@ -120,7 +120,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         }
 
         if (2 + dataLength > receivedData.size) {
-            logger.warning("Received incorrect data size: ${receivedData.size - 2} != $dataLength")
+            logger.fine("Received incorrect data size: ${receivedData.size - 2} != $dataLength")
             return null
         }
 
@@ -146,13 +146,14 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     }
 
     private fun sendSerialDeviceUpdate() {
-        logger.info("Sending heartbeat to serial device")
+        logger.fine("Sending heartbeat to serial device")
         if (hardwareDevice.getComPort() == null) {
-            logger.info("Serial device unconnected, cannot send heartbeat")
+            logger.warning("Serial device unconnected, cannot send heartbeat")
             return
         }
 
         val updateBytes = ByteArray(26)
+        updateBytes[0] = hardwareDevice.operationMode.id.toByte()
         hardwareDevice.getComPort()?.writeBytes(updateBytes, updateBytes.size.toLong())
     }
 
@@ -163,14 +164,14 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
 
     private fun removeFromData(amount: Int) {
         for (i in 0 until min(amount, receivedData.size)) {
-            logger.info("Cleaning up serial data with amount: $amount")
+            logger.fine("Cleaning up serial data with amount: $amount")
             receivedData.removeAt(0)
         }
-        logger.info("Serial data left: ${receivedData.size}")
+        logger.fine("Serial data left: ${receivedData.size}")
     }
 
     fun clear() {
-        logger.info("Clearing serial data buffer")
+        logger.fine("Clearing serial data buffer")
         receivedData.clear()
         metaByte = null
     }

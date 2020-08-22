@@ -10,7 +10,7 @@ object Config {
     var hardwareDeviceComName: String = "USB-to-Serial Port (ch341-uart)"
     var hardwareDeviceComBaudRate: Int = 115200
 
-    var serialMetaBits: Int = 0x05
+    var serialMetaBitsValue: Int = 0x05
 
     fun load() {
         try {

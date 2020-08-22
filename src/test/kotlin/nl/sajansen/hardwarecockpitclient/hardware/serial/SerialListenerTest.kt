@@ -23,14 +23,14 @@ class SerialListenerTest {
 
     @Test
     fun testValidateMetaForData() {
-        val metaByte = Config.serialMetaBits.shl(0x05).toByte()
+        val metaByte = Config.serialMetaBitsValue.shl(0x05).toByte()
         val result = serialListener.validateMetaForData(arrayListOf(metaByte))
         assertTrue(result)
     }
 
     @Test
     fun testValidateMetaForDataWithInvalidMetaBit() {
-        val metaByte = (Config.serialMetaBits - 1).shl(0x05).toByte()
+        val metaByte = (Config.serialMetaBitsValue - 1).shl(0x05).toByte()
         val result = serialListener.validateMetaForData(arrayListOf(metaByte))
         assertFalse(result)
     }
@@ -349,7 +349,7 @@ class SerialListenerTest {
     }
 
     private fun createMetaByte(updateType: SerialDataType, dataLength: Int): Byte {
-        return (Config.serialMetaBits.shl(0x05)
+        return (Config.serialMetaBitsValue.shl(0x05)
                 + updateType.id.and(0x07).shl(0x02)
                 + dataLength.and(0x03)).toByte()
     }

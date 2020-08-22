@@ -16,6 +16,7 @@ class KeyboardConnector : Connector {
 
         when (name) {
             CockpitDevice.NAME_BUTTON_ATC -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_SCROLL_LOCK, 0))
+            CockpitDevice.NAME_BUTTON_1 -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_MASK))
             CockpitDevice.NAME_BUTTON_LAND -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_L, InputEvent.CTRL_MASK))
             CockpitDevice.NAME_SLIDER_FLAPS -> {
                 when (value) {

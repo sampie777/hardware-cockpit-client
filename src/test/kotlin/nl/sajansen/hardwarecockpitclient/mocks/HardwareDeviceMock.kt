@@ -6,6 +6,7 @@ import nl.sajansen.hardwarecockpitclient.hardware.HardwareDevice
 import nl.sajansen.hardwarecockpitclient.hardware.components.Button
 import nl.sajansen.hardwarecockpitclient.hardware.components.Component
 import nl.sajansen.hardwarecockpitclient.hardware.components.Slider
+import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialOperationMode
 import java.util.logging.Logger
 
 class HardwareDeviceMock : HardwareDevice {
@@ -22,6 +23,7 @@ class HardwareDeviceMock : HardwareDevice {
         Slider(3, NAME_SLIDER_3),
         Slider(4, NAME_SLIDER_4)
     )
+    override var operationMode = SerialOperationMode.OPERATION_MODE_UNCONNECTED
 
     var serialPort: SerialPort? = null
     override fun getComPort(): SerialPort? = serialPort
