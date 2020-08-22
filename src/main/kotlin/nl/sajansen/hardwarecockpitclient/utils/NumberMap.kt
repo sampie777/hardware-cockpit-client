@@ -9,23 +9,30 @@ enum class NumberMapMode {
 class NumberMap(
     val minOut: Int,
     val maxOut: Int,
-    val minIn: Int = 0,
-    val maxIn: Int = 1,
+    val minIn: Int = minOut,
+    val maxIn: Int = maxOut,
     val mode: NumberMapMode = NumberMapMode.LINEAR
 ) {
     fun map(value: Int): Int {
+        val inputMappedValue = when {
+            value < minIn -> minIn
+            value > maxIn -> maxIn
+            else -> value
+        }
+
         return if (mode == NumberMapMode.ABSOLUTE) {
-            mapAbsolute(value)
+            mapAbsolute(inputMappedValue)
         } else {
-            mapLinear(value)
+            mapLinear(inputMappedValue)
         }
     }
 
     private fun mapLinear(value: Int): Int {
+        val mappedValue = minOut + ((value - minIn) * (maxOut - minOut).toDouble() / (maxIn - minIn)).toInt()
         return when {
-            minIn < minOut -> minOut
-            maxIn > maxOut -> maxOut
-            else -> (value * (maxOut - minOut).toDouble() / (maxIn - minIn)).toInt()
+            mappedValue < minOut -> minOut
+            mappedValue > maxOut -> maxOut
+            else -> mappedValue
         }
     }
 

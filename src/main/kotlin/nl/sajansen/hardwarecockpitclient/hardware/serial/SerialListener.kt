@@ -109,7 +109,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         }
 
         if (component == null) {
-            logger.warning("Component for id '${id}' not found")
+            logger.fine("Component for id '${id}' not found")
         }
         return component
     }
