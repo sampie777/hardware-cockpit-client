@@ -102,14 +102,14 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     }
 
     fun getComponentForData(receivedData: ArrayList<Byte>): Component? {
-        val id = receivedData[1].toInt()
+        val id = receivedData[1]
 
         val component = hardwareDevice.components.find {
-            it.id == id
+            it.id.toByte() == id
         }
 
         if (component == null) {
-//            logger.warning("Component for id '$id' not found")
+            logger.warning("Component for id '${id}' not found")
         }
         return component
     }

@@ -11,9 +11,7 @@ class Slider(override val id: Int, override val name: String, private val number
     private var value: Int = 0
 
     override fun value(): Any? {
-        val temp = value
-        reset()
-        return temp
+        return value
     }
 
     override fun set(newRawValue: Int) {

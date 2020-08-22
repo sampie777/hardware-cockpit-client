@@ -66,6 +66,16 @@ class SerialListenerTest {
     }
 
     @Test
+    fun testGetComponentForDataUnsignedTest() {
+        val idByte = 240.toByte()
+        val result = serialListener.getComponentForData(arrayListOf(0, idByte))
+
+        assertNotNull(result)
+        assertEquals(240, result.id)
+        assertEquals(hardwareDevice.components[4], result)
+    }
+
+    @Test
     fun testGetDataLengthForMetaByte() {
         var metaByte = 1.and(0x03)
         var result = serialListener.getDataLengthForMetaByte(metaByte)
@@ -154,6 +164,32 @@ class SerialListenerTest {
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_BUTTON_1, testConnector.valueUpdatedWithKey)
         assertEquals(true, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+    }
+
+    @Test
+    fun testSwitchToggleCommandReachesConnector() {
+        val testConnector = ConnectorMock()
+        testConnector.enable()
+
+        val dataOn = byteArrayOf(createMetaByte(SerialDataType.BOOLEAN, 1), 2, 1)
+        val eventOn = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, dataOn)
+
+        // When
+        serialListener.serialEvent(eventOn)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SWITCH_2, testConnector.valueUpdatedWithKey)
+        assertEquals(true, testConnector.valueUpdatedWithValue)
+
+        val dataOff = byteArrayOf(createMetaByte(SerialDataType.BOOLEAN, 1), 2, 0)
+        val eventOff = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, dataOff)
+
+        // When
+        serialListener.serialEvent(eventOff)
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SWITCH_2, testConnector.valueUpdatedWithKey)
+        assertEquals(false, testConnector.valueUpdatedWithValue)
     }
 
     @Test

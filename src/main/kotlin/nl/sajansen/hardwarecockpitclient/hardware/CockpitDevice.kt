@@ -5,9 +5,11 @@ import com.fazecast.jSerialComm.SerialPort
 import nl.sajansen.hardwarecockpitclient.hardware.components.Button
 import nl.sajansen.hardwarecockpitclient.hardware.components.Component
 import nl.sajansen.hardwarecockpitclient.hardware.components.Slider
+import nl.sajansen.hardwarecockpitclient.hardware.components.Switch
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialListener
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialOperationMode
 import nl.sajansen.hardwarecockpitclient.utils.NumberMap
+import nl.sajansen.hardwarecockpitclient.utils.NumberMapMode
 import java.util.logging.Logger
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -24,9 +26,9 @@ object CockpitDevice : HardwareDevice {
     override val components = listOf<Component>(
         Button(150, NAME_BUTTON_ATC),
         Button(151, NAME_BUTTON_1),
-        Button(3, NAME_BUTTON_LAND),
+        Switch(3, NAME_BUTTON_LAND),
         Slider(100, NAME_SLIDER_FLAPS),
-        Slider(104, NAME_SLIDER_SPOILER, NumberMap(0, 16383, 0, 9))
+        Slider(104, NAME_SLIDER_SPOILER, NumberMap(0, 16383, 1, 9, mode = NumberMapMode.LINEAR))
     )
 
     override var operationMode: SerialOperationMode = SerialOperationMode.OPERATION_MODE_SIMULATOR
