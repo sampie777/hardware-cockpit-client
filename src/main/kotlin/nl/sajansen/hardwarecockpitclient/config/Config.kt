@@ -11,6 +11,8 @@ object Config {
     var hardwareDeviceComBaudRate: Int = 115200
     var serialMetaBitsValue: Int = 0x05
 
+    var asynchronousUpdates: Boolean = true
+
     // KeyboardConnector
     var keyPressDownDuration: Int = 80
     var keyPressUpDuration: Int = 20

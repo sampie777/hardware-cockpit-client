@@ -19,6 +19,7 @@ class SerialListenerTest {
     fun before() {
         ConnectorRegister.unregisterAll()
         serialListener.clear()
+        Config.asynchronousUpdates = false
     }
 
     @Test

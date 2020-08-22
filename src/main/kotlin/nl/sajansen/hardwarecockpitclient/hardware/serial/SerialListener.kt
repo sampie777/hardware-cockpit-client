@@ -137,7 +137,11 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         logger.info("Calling set() for component: $component")
 
         try {
-            component.set(value)
+            if (Config.asynchronousUpdates) {
+                Thread { component.set(value) }.start()
+            } else {
+                component.set(value)
+            }
         } catch (e: Exception) {
             logger.severe("Failed to set value: $value, for component: $component")
             e.printStackTrace()
