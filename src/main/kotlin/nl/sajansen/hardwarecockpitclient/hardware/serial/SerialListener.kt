@@ -15,8 +15,8 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     private val logger = Logger.getLogger(SerialListener::class.java.name)
 
     var receivedData = arrayListOf<Byte>()
-    private var metaByte: Int? = null
-    private var dataLength: Int? = null
+    var metaByte: Int? = null
+    var dataLength: Int = 0
 
     override fun getListeningEvents(): Int {
         return SerialPort.LISTENING_EVENT_DATA_RECEIVED
@@ -46,35 +46,32 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     private fun processData(receivedData: ArrayList<Byte>): Boolean {
         logger.info("Processing received serial data: ${receivedData.map { Integer.toHexString(it.toInt()) }}")
 
-        if (metaByte == null && !validateMetaForData(receivedData)) {
-            return false
+        if (metaByte == null) {
+            if (!validateMetaForData(receivedData)) {
+                return false
+            } else {
+                metaByte = receivedData[0].toInt()
+                dataLength = getDataLengthForMetaByte(metaByte!!)
+            }
         }
 
-        val updateType = getUpdateTypeForData(receivedData) ?: return false
-
+        val updateType = getUpdateTypeForData() ?: return false
         if (updateType == SerialDataType.UPDATE_REQUEST) {
             sendSerialDeviceUpdate()
-            removeFromData(2)
+            clearSerialBufferForCurrentMessage()
             return true
         }
 
         val component = getComponentForData(receivedData)
         val value = getValueForData(receivedData) ?: return true
 
+        clearSerialBufferForCurrentMessage()
+
         if (component == null) {
             return true
         }
 
-        logger.info("Calling set() for component: $component")
-
-        try {
-            println("FOUND SOMETHING")
-            component.set(value)
-        } catch (e: Exception) {
-            logger.severe("Failed to set value: $value, for component: $component")
-            e.printStackTrace()
-        }
-
+        setComponentWithData(component, value)
         return true
     }
 
@@ -87,21 +84,20 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
             logger.warning("Meta data '$metaBits' is invalid or this isn't the meta data byte")
             return false
         }
-
-        this.metaByte = metaByte
-        this.dataLength = metaByte.and(0x03)
         return true
     }
 
-    fun getUpdateTypeForData(receivedData: ArrayList<Byte>): SerialDataType? {
-        val metaByte = receivedData[0].toInt()
-        val updateTypeInt = metaByte.shr(2).and(0x07)
+    fun getDataLengthForMetaByte(metaByte: Int) = metaByte.and(0x03)
+
+    fun getUpdateTypeForData(): SerialDataType? {
+        val updateTypeInt = metaByte!!.shr(2).and(0x07)
 
         return try {
             SerialDataType.fromInt(updateTypeInt)
         } catch (e: Exception) {
             logger.warning("Update type $updateTypeInt is invalid: ${e.localizedMessage}")
-            return null
+            metaByte = null
+            null
         }
     }
 
@@ -109,7 +105,6 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         val id = receivedData[1].toInt()
 
         val component = hardwareDevice.components.find {
-            println(it)
             it.id == id
         }
 
@@ -120,11 +115,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     }
 
     fun getValueForData(receivedData: ArrayList<Byte>): Int? {
-        val metaByte = receivedData[0].toInt()
-        val dataLength = metaByte.and(0x03)
-
         if (dataLength == 0) {
-            removeFromData(2 + dataLength)
             return 1
         }
 
@@ -138,10 +129,20 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         while (bytes.size < 4) {
             bytes.add(0, 0)
         }
-        val value = ByteBuffer.wrap(bytes.toByteArray()).int
 
-        removeFromData(2 + dataLength)
-        return value
+        return ByteBuffer.wrap(bytes.toByteArray()).int
+    }
+
+    private fun setComponentWithData(component: Component, value: Int) {
+        logger.info("Calling set() for component: $component")
+
+        try {
+            println("FOUND SOMETHING")
+            component.set(value)
+        } catch (e: Exception) {
+            logger.severe("Failed to set value: $value, for component: $component")
+            e.printStackTrace()
+        }
     }
 
     private fun sendSerialDeviceUpdate() {
@@ -155,6 +156,11 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         hardwareDevice.getComPort()?.writeBytes(updateBytes, updateBytes.size.toLong())
     }
 
+    private fun clearSerialBufferForCurrentMessage() {
+        removeFromData(2 + dataLength)
+        metaByte = null
+    }
+
     private fun removeFromData(amount: Int) {
         for (i in 0 until min(amount, receivedData.size)) {
             logger.info("Cleaning up serial data with amount: $amount")
@@ -166,5 +172,6 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     fun clear() {
         logger.info("Clearing serial data buffer")
         receivedData.clear()
+        metaByte = null
     }
 }

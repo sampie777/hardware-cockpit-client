@@ -4,14 +4,14 @@ import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortEvent
 import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
-import nl.sajansen.hardwarecockpitclient.mocks.TestConnector
-import nl.sajansen.hardwarecockpitclient.mocks.TestHardwareDevice
+import nl.sajansen.hardwarecockpitclient.mocks.ConnectorMock
+import nl.sajansen.hardwarecockpitclient.mocks.HardwareDeviceMock
 import kotlin.test.*
 
 
 class SerialListenerTest {
 
-    private val hardwareDevice = TestHardwareDevice()
+    private val hardwareDevice = HardwareDeviceMock()
     private val serialListener = SerialListener(hardwareDevice)
     private val serialPort = SerialPort.getCommPort("test-port")
 
@@ -37,15 +37,15 @@ class SerialListenerTest {
 
     @Test
     fun testGetUpdateTypeForData() {
-        val metaByte = SerialDataType.TOGGLE.id.and(0x07).shl(0x02).toByte()
-        val result = serialListener.getUpdateTypeForData(arrayListOf(metaByte))
+        serialListener.metaByte = SerialDataType.TOGGLE.id.and(0x07).shl(0x02)
+        val result = serialListener.getUpdateTypeForData()
         assertEquals(SerialDataType.TOGGLE, result)
     }
 
     @Test
     fun testGetUpdateTypeForDataForInvalidType() {
-        val metaByte = 255.and(0x07).shl(0x02).toByte()
-        val result = serialListener.getUpdateTypeForData(arrayListOf(metaByte))
+        serialListener.metaByte = 255.and(0x07).shl(0x02)
+        val result = serialListener.getUpdateTypeForData()
         assertNull(result)
     }
 
@@ -66,65 +66,76 @@ class SerialListenerTest {
     }
 
     @Test
+    fun testGetDataLengthForMetaByte() {
+        var metaByte = 1.and(0x03)
+        var result = serialListener.getDataLengthForMetaByte(metaByte)
+        assertEquals(1, result)
+
+        metaByte = 2.and(0x03)
+        result = serialListener.getDataLengthForMetaByte(metaByte)
+        assertEquals(2, result)
+    }
+
+    @Test
     fun testGetValueForDataWithZeroLength() {
-        val metaByte = 0.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0))
+        serialListener.dataLength = 0
+        val result = serialListener.getValueForData(arrayListOf(0, 0))
         assertEquals(1, result)
     }
 
     @Test
     fun testGetValueForDataWithLengthOne() {
-        val metaByte = 1.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 0))
+        serialListener.dataLength = 1
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 0))
         assertEquals(0, result)
     }
 
     @Test
     fun testGetValueForDataWithLengthOne1() {
-        val metaByte = 1.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8))
+        serialListener.dataLength = 1
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 8))
         assertEquals(8, result)
     }
 
     @Test
     fun testGetValueForDataWithLengthTwo() {
-        val metaByte = 2.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 0, 0))
+        serialListener.dataLength = 2
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 0, 0))
         assertEquals(0, result)
     }
 
     @Test
     fun testGetValueForDataWithLengthTwo1() {
-        val metaByte = 2.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 1, 8))
+        serialListener.dataLength = 2
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 1, 8))
         assertEquals(264, result)
     }
 
     @Test
     fun testGetValueForDataWithLengthTwo2() {
-        val metaByte = 2.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 1, 0xff.toByte()))
+        serialListener.dataLength = 2
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 1, 0xff.toByte()))
         assertEquals(511, result)
     }
 
     @Test
     fun testGetValueForDataWithLengthThree() {
-        val metaByte = 3.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 0, 0, 8))
+        serialListener.dataLength = 3
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 0, 0, 8))
         assertEquals(8, result)
     }
 
     @Test
     fun testGetValueForDataWithIncorrectLength() {
-        val metaByte = 3.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8))
+        serialListener.dataLength = 3
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 8))
         assertNull(result)
     }
 
     @Test
     fun testGetValueForDataWithIncorrectLength1() {
-        val metaByte = 1.and(0x03).toByte()
-        val result = serialListener.getValueForData(arrayListOf(metaByte, 0, 8, 2, 3, 4))
+        serialListener.dataLength = 1
+        val result = serialListener.getValueForData(arrayListOf(0, 0, 8, 2, 3, 4))
         assertEquals(8, result)
     }
 
@@ -132,7 +143,7 @@ class SerialListenerTest {
     fun testButtonToggleCommandReachesConnector() {
         val data = byteArrayOf(createMetaByte(SerialDataType.TOGGLE, 0), 1)
 
-        val testConnector = TestConnector()
+        val testConnector = ConnectorMock()
         testConnector.enable()
 
         val event = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, data)
@@ -149,7 +160,7 @@ class SerialListenerTest {
     fun testSliderValueCommandReachesConnector() {
         val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
 
-        val testConnector = TestConnector()
+        val testConnector = ConnectorMock()
         testConnector.enable()
 
         val event = SerialPortEvent(serialPort, SerialPort.LISTENING_EVENT_DATA_RECEIVED, data)
@@ -159,14 +170,14 @@ class SerialListenerTest {
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
-        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+        assertEquals(515, testConnector.valueUpdatedWithValue)
     }
 
     @Test
     fun testSliderValueCommandReachesConnectorByteByByte() {
         val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
 
-        val testConnector = TestConnector()
+        val testConnector = ConnectorMock()
         testConnector.enable()
 
         // When
@@ -176,7 +187,7 @@ class SerialListenerTest {
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
-        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+        assertEquals(515, testConnector.valueUpdatedWithValue)
     }
 
     @Test
@@ -189,7 +200,6 @@ class SerialListenerTest {
         sendSerialEventWithData(byteArrayOf(data[1], data[2]))
         assertEquals(3, serialListener.receivedData.size)
         sendSerialEventWithData(byteArrayOf(data[3]))
-        println(serialListener.receivedData)
         assertEquals(0, serialListener.receivedData.size)
     }
 
@@ -197,7 +207,7 @@ class SerialListenerTest {
     fun testDataSurroundedWithIncorrectDataGetsProcessed() {
         val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
 
-        val testConnector = TestConnector()
+        val testConnector = ConnectorMock()
         testConnector.enable()
 
         // When
@@ -209,14 +219,14 @@ class SerialListenerTest {
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
-        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+        assertEquals(515, testConnector.valueUpdatedWithValue)
     }
 
     @Test
     fun testIncorrectDataGetsProcessedUntilValidData() {
         val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
 
-        val testConnector = TestConnector()
+        val testConnector = ConnectorMock()
         testConnector.enable()
         // When
         sendSerialEventWithData(byteArrayOf(99))
@@ -234,7 +244,7 @@ class SerialListenerTest {
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
-        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+        assertEquals(515, testConnector.valueUpdatedWithValue)
     }
 
     @Test
@@ -246,22 +256,86 @@ class SerialListenerTest {
             3
         )
 
-        val testConnector = TestConnector()
+        val testConnector = ConnectorMock()
         testConnector.enable()
 
         // When
         sendSerialEventWithData(byteArrayOf(data[0]))
         assertEquals(1, serialListener.receivedData.size)
+
         sendSerialEventWithData(byteArrayOf(data[1]))
         assertEquals(2, serialListener.receivedData.size)
+        assertEquals(data[0].toInt(), serialListener.metaByte)
+        assertEquals(2, serialListener.dataLength)
+
         sendSerialEventWithData(byteArrayOf(data[2]))
         assertEquals(3, serialListener.receivedData.size)
+        assertEquals(data[0].toInt(), serialListener.metaByte)
+        assertEquals(2, serialListener.dataLength)
+
         sendSerialEventWithData(byteArrayOf(data[3]))
         assertEquals(0, serialListener.receivedData.size)
+        assertNull(serialListener.metaByte)
+        assertEquals(2, serialListener.dataLength)
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
-        assertEquals(515, testConnector.valueUpdatedWithValue) // True, because it comes from a button component
+        assertEquals(data[2].toUByte().toInt(), (testConnector.valueUpdatedWithValue as Int).shr(8))
+        assertEquals(3, (testConnector.valueUpdatedWithValue as Int).and(0xff))
+        assertEquals(44547, testConnector.valueUpdatedWithValue)
+    }
+
+    @Test
+    fun testDataWithIncorrectDataBetween() {
+        val data1 = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 3, 2, 3)
+        val data2 = byteArrayOf(createMetaByte(SerialDataType.RELATIVE_VALUE, 2), 4, 8, 9)
+
+        val testConnector = ConnectorMock()
+        testConnector.enable()
+
+        // When
+        sendSerialEventWithData(byteArrayOf(99))
+        sendSerialEventWithData(byteArrayOf(99, data1[0]))
+        sendSerialEventWithData(byteArrayOf(data1[1], 99, data1[2]))
+        sendSerialEventWithData(byteArrayOf(99, data1[3], data2[0]))
+        sendSerialEventWithData(byteArrayOf(data2[1], data2[2], data2[3], 99))
+        sendSerialEventWithData(byteArrayOf(99))
+
+        assertTrue(testConnector.valueUpdated)
+        assertEquals(hardwareDevice.NAME_SLIDER_4, testConnector.valueUpdatedWithKey)
+        assertEquals(2057, testConnector.valueUpdatedWithValue)
+    }
+
+    @Test
+    fun testDataWithNonExistingKeyGetsCleared() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.ABSOLUTE_VALUE, 2), 99, 2, 3)
+
+        val testConnector = ConnectorMock()
+        testConnector.enable()
+
+        // When
+        sendSerialEventWithData(byteArrayOf(data[0]))
+        sendSerialEventWithData(byteArrayOf(data[1], data[2]))
+        sendSerialEventWithData(byteArrayOf(data[3]))
+        assertEquals(0, serialListener.receivedData.size)
+
+        assertFalse(testConnector.valueUpdated)
+    }
+
+    @Test
+    fun testSendSerialUpdate() {
+        val data = byteArrayOf(createMetaByte(SerialDataType.UPDATE_REQUEST, 2), 1)
+
+        val testConnector = ConnectorMock()
+        testConnector.enable()
+
+        // When
+        sendSerialEventWithData(data)
+
+        assertFalse(testConnector.valueUpdated)
+        assertNull(serialListener.metaByte)
+        assertEquals(0, serialListener.receivedData.size)
+
     }
 
     private fun sendSerialEventWithData(data: ByteArray) {

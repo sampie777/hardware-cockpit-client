@@ -4,8 +4,8 @@ package nl.sajansen.hardwarecockpitclient.mocks
 import nl.sajansen.hardwarecockpitclient.connectors.Connector
 import java.util.logging.Logger
 
-class TestConnector : Connector {
-    private val logger = Logger.getLogger(TestConnector::class.java.name)
+class ConnectorMock : Connector {
+    private val logger = Logger.getLogger(ConnectorMock::class.java.name)
 
     var valueUpdated = false
     var valueUpdatedWithKey = ""
