@@ -17,3 +17,22 @@ class ConnectorMock : Connector {
         valueUpdatedWithValue = value
     }
 }
+
+class ConnectorMockWithDelay : Connector {
+    private val logger = Logger.getLogger(ConnectorMock::class.java.name)
+
+    var valueUpdated = false
+    var valueUpdatedWithKey = ""
+    var valueUpdatedWithValues: ArrayList<Any?> = arrayListOf()
+
+    override fun valueUpdate(name: String, value: Any) {
+        logger.info("Receiving value: $value, from name: $name")
+
+        valueUpdated = true
+        valueUpdatedWithKey = name
+        valueUpdatedWithValues.add(value)
+        logger.info("Added value: $value, to arraylist")
+
+        Thread.sleep(20)
+    }
+}

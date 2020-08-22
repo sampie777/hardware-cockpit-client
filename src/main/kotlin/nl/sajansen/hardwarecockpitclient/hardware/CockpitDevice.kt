@@ -2,10 +2,7 @@ package nl.sajansen.hardwarecockpitclient.hardware
 
 
 import com.fazecast.jSerialComm.SerialPort
-import nl.sajansen.hardwarecockpitclient.hardware.components.Button
-import nl.sajansen.hardwarecockpitclient.hardware.components.Component
-import nl.sajansen.hardwarecockpitclient.hardware.components.Slider
-import nl.sajansen.hardwarecockpitclient.hardware.components.Switch
+import nl.sajansen.hardwarecockpitclient.hardware.components.*
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialListener
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialOperationMode
 import nl.sajansen.hardwarecockpitclient.utils.NumberMap
@@ -47,6 +44,14 @@ object CockpitDevice : HardwareDevice {
     const val NAME_SLIDER_F = "F"
     const val NAME_SLIDER_FEET_PEDAL_LEFT = "FEET PEDAL LEFT"
     const val NAME_SLIDER_FEET_PEDAL_RIGHT = "FEET PEDAL RIGHT"
+    const val NAME_ROTARY_TRIM_ELEVATOR = "ELEVATOR TRIM"
+    const val NAME_ROTARY_TRIM_AILERONS = "AILERONS TRIM"
+    const val NAME_ROTARY_TRIM_RUDDER = "RUDDER TRIM"
+    const val NAME_ROTARY_AP_SPEED = "AP SPEED"
+    const val NAME_ROTARY_AP_HEADING = "AP HEADING"
+    const val NAME_ROTARY_AP_ALTITUDE = "AP ALTITUDE"
+    const val NAME_ROTARY_AP_VSPEED = "AP V.SPEED"
+    const val NAME_ROTARY_E = "E"
 
     override val components = listOf<Component>(
         Button(160, NAME_BUTTON_PAUSE),
@@ -78,9 +83,18 @@ object CockpitDevice : HardwareDevice {
 
         Slider(100, NAME_SLIDER_FLAPS),
         Slider(104, NAME_SLIDER_SPOILER, NumberMap(0, 16383, 1, 9, mode = NumberMapMode.LINEAR)),
-        Slider(105, NAME_SLIDER_F)
+        Slider(105, NAME_SLIDER_F),
 //        Slider(106, NAME_SLIDER_FEET_PEDAL_LEFT),
-//        Slider(107, NAME_SLIDER_FEET_PEDAL_RIGHT)
+//        Slider(107, NAME_SLIDER_FEET_PEDAL_RIGHT),
+
+        Rotary(11, NAME_ROTARY_TRIM_ELEVATOR),
+        Rotary(12, NAME_ROTARY_TRIM_AILERONS),
+        Rotary(13, NAME_ROTARY_TRIM_RUDDER),
+        Rotary(14, NAME_ROTARY_AP_SPEED),
+        Rotary(15, NAME_ROTARY_AP_HEADING),
+        Rotary(16, NAME_ROTARY_AP_ALTITUDE),
+        Rotary(17, NAME_ROTARY_AP_VSPEED),
+        Rotary(22, NAME_ROTARY_E)
     )
 
     override var operationMode: SerialOperationMode = SerialOperationMode.OPERATION_MODE_SIMULATOR

@@ -9,6 +9,8 @@ class Slider(override val id: Int, override val name: String, private val number
     private val logger = Logger.getLogger(Slider::class.java.name)
 
     private var value: Int = 0
+    private var valueBeforeUpdating: Int = 0
+    private var updating: Boolean = false
 
     override fun value(): Any? {
         return value
@@ -16,8 +18,8 @@ class Slider(override val id: Int, override val name: String, private val number
 
     override fun set(newRawValue: Int) {
         value = mapValue(newRawValue)
-
         logger.info("Setting slider '$name' value to: $value")
+
         sendValueUpdate()
     }
 
@@ -27,7 +29,22 @@ class Slider(override val id: Int, override val name: String, private val number
     }
 
     override fun sendValueUpdate() {
-        ConnectorRegister.valueUpdate(name, value)
+        if (updating) { // Wait till updating is finished before doing new stuff
+            return
+        }
+
+        updating = true
+        valueBeforeUpdating = value
+
+        ConnectorRegister.valueUpdate(name, valueBeforeUpdating)
+        updating = false
+
+        // Check for value changes happened during update
+        if (value == valueBeforeUpdating) {
+            return
+        }
+
+        sendValueUpdate()
     }
 
     override fun toString(): String {
