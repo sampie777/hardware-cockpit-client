@@ -21,8 +21,11 @@ fun main(args: Array<String>) {
     KeyboardConnector().enable()
 
     CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
+
+    @Suppress("ControlFlowWithEmptyBody")
     while (true) {}
 
+    @Suppress("UNREACHABLE_CODE", "ControlFlowWithEmptyBody")
     CockpitDevice.disconnect()
 }
 

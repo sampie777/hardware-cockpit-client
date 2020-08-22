@@ -316,7 +316,7 @@ class SerialListenerTest {
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(hardwareDevice.NAME_SLIDER_3, testConnector.valueUpdatedWithKey)
-        assertEquals(data[2].toUByte().toInt(), (testConnector.valueUpdatedWithValue as Int).shr(8))
+        assertEquals(data[2], (testConnector.valueUpdatedWithValue as Int).shr(8).toByte())
         assertEquals(3, (testConnector.valueUpdatedWithValue as Int).and(0xff))
         assertEquals(44547, testConnector.valueUpdatedWithValue)
     }
