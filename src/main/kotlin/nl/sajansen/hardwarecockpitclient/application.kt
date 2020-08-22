@@ -7,8 +7,9 @@ import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.utils.getCurrentJarDirectory
 import java.util.logging.Logger
 
-
 fun main(args: Array<String>) {
+    attachExitCatcher()
+
     val logger = Logger.getLogger("Application")
     logger.info("Executing JAR directory: " + getCurrentJarDirectory(Config).absolutePath)
 
@@ -19,7 +20,8 @@ fun main(args: Array<String>) {
     KeyboardConnector().enable()
 
     CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
-    Thread.sleep(10000)
+    while (true) {}
+
     CockpitDevice.disconnect()
 }
 
@@ -27,4 +29,13 @@ fun listSerialPorts() {
     SerialPort.getCommPorts().forEach {
         println("- $it")
     }
+}
+
+fun attachExitCatcher() {
+    Runtime.getRuntime().addShutdownHook(object : Thread() {
+        override fun run() {
+            CockpitDevice.disconnect()
+            println("Application will be terminated")
+        }
+    })
 }
