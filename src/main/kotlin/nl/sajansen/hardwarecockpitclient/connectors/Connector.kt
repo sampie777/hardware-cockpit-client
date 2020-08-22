@@ -9,5 +9,5 @@ interface Connector {
         ConnectorRegister.unregister(this)
     }
 
-    fun valueUpdate(name: String, value: Any?)
+    fun valueUpdate(name: String, value: Any)
 }

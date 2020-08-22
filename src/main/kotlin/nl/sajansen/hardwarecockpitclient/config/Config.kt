@@ -9,8 +9,11 @@ object Config {
 
     var hardwareDeviceComName: String = "USB-to-Serial Port (ch341-uart)"
     var hardwareDeviceComBaudRate: Int = 115200
-
     var serialMetaBitsValue: Int = 0x05
+
+    // KeyboardConnector
+    var keyPressDownDuration: Int = 80
+    var keyPressUpDuration: Int = 20
 
     // Logging
     var enableApplicationLoggingToFile: Boolean = true

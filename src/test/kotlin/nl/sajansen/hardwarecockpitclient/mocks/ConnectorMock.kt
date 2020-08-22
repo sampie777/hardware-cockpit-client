@@ -11,7 +11,7 @@ class ConnectorMock : Connector {
     var valueUpdatedWithKey = ""
     var valueUpdatedWithValue: Any? = null
 
-    override fun valueUpdate(name: String, value: Any?) {
+    override fun valueUpdate(name: String, value: Any) {
         valueUpdated = true
         valueUpdatedWithKey = name
         valueUpdatedWithValue = value

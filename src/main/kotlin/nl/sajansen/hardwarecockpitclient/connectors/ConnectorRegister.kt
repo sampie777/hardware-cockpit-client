@@ -22,7 +22,7 @@ object ConnectorRegister {
         connectors.clear()
     }
 
-    fun valueUpdate(name: String, value: Any?) {
+    fun valueUpdate(name: String, value: Any) {
         logger.info("Sending value update to connectors")
         try {
             connectors

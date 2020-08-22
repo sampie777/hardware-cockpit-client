@@ -8,6 +8,11 @@ import nl.sajansen.hardwarecockpitclient.utils.getCurrentJarDirectory
 import java.util.logging.Logger
 
 fun main(args: Array<String>) {
+    if (args.contains("--list-devices")) {
+        listSerialPorts()
+        return
+    }
+
     attachExitCatcher()
 
     val logger = Logger.getLogger("Application")
@@ -20,18 +25,17 @@ fun main(args: Array<String>) {
 
     KeyboardConnector().enable()
 
-    CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
+    val connection = CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
 
     @Suppress("ControlFlowWithEmptyBody")
-    while (true) {}
+    while (connection) {}
 
-    @Suppress("UNREACHABLE_CODE", "ControlFlowWithEmptyBody")
     CockpitDevice.disconnect()
 }
 
 fun listSerialPorts() {
     SerialPort.getCommPorts().forEach {
-        println("- $it")
+        println("- ${it.descriptivePortName} [${it.systemPortName}]")
     }
 }
 

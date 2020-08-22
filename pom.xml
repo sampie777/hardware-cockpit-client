@@ -35,7 +35,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- For serial communication -->
+        <!-- For serial communication (https://github.com/Fazecast/jSerialComm) -->
         <dependency>
             <groupId>com.fazecast</groupId>
             <artifactId>jSerialComm</artifactId>
