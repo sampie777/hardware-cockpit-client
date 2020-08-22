@@ -7,10 +7,10 @@ enum class NumberMapMode {
 }
 
 class NumberMap(
-    val minIn: Int,
-    val maxIn: Int,
     val minOut: Int,
     val maxOut: Int,
+    val minIn: Int = 0,
+    val maxIn: Int = 1,
     val mode: NumberMapMode = NumberMapMode.LINEAR
 ) {
     fun map(value: Int): Int {
@@ -25,14 +25,14 @@ class NumberMap(
         return when {
             minIn < minOut -> minOut
             maxIn > maxOut -> maxOut
-            else -> value * (maxIn - minIn) / (maxOut - minOut)
+            else -> (value * (maxOut - minOut).toDouble() / (maxIn - minIn)).toInt()
         }
     }
 
     private fun mapAbsolute(value: Int): Int {
         return when {
-            minIn < minOut -> minOut
-            maxIn > maxOut -> maxOut
+            value < minOut -> minOut
+            value > maxOut -> maxOut
             else -> value
         }
     }
