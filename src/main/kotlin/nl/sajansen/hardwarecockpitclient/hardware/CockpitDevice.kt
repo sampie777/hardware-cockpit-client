@@ -43,19 +43,30 @@ object CockpitDevice : HardwareDevice {
         }
 
         comPort!!.baudRate = baudRate
-        comPort!!.addDataListener(SerialListener(this))
         val connected = comPort!!.openPort()
 
-        if (connected) {
-            logger.info("Connected to hardware device '$deviceName'")
-        } else {
+        if (!connected) {
             logger.severe("Could not connect to hardware device '$deviceName'")
+            return false
         }
-        return connected
+
+        logger.info("Connected to hardware device '$deviceName'")
+        clearComPort()
+        comPort!!.addDataListener(SerialListener(this))
+
+        return true
     }
 
     override fun disconnect() {
         comPort?.closePort()
         logger.info("Hardware device disconnected")
+    }
+
+    private fun clearComPort() {
+        logger.info("Clearing com port buffer")
+        while (comPort!!.bytesAvailable() > 0) {
+            val byteBuffer = ByteArray(comPort!!.bytesAvailable())
+            comPort?.readBytes(byteBuffer, byteBuffer.size.toLong())
+        }
     }
 }
