@@ -1,5 +1,6 @@
 package nl.sajansen.hardwarecockpitclient.hardware.components
 
+import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
 import nl.sajansen.hardwarecockpitclient.mocks.ConnectorMockWithDelay
 import kotlin.test.BeforeTest
@@ -12,6 +13,7 @@ class RotaryTest {
     @BeforeTest
     fun before() {
         ConnectorRegister.unregisterAll()
+        Config.rotaryMinUpdateInterval = 5
     }
 
     @Test
@@ -25,7 +27,7 @@ class RotaryTest {
         Thread { component.set(11) }.start()
         Thread.sleep(5)
         component.set(-3)
-        Thread.sleep(30) // Wait for ConnecterMock2 to complete update task of 20 ms
+        Thread.sleep(50) // Wait for ConnecterMock2 to complete update task of 20 ms
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(2, testConnector.valueUpdatedWithValues.size)

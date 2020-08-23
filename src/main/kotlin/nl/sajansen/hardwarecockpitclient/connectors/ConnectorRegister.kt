@@ -22,12 +22,34 @@ object ConnectorRegister {
         connectors.clear()
     }
 
+    fun disableAll() {
+        logger.info("Disabling all connectors")
+
+        connectors
+            .toTypedArray()
+            .forEach {
+                try {
+                    it.disable()
+                } catch (e: Exception) {
+                    logger.severe("Failed to disable connector: ${it.javaClass.name}")
+                    e.printStackTrace()
+                }
+            }
+    }
+
     fun valueUpdate(name: String, value: Any) {
         logger.info("Sending value update to connectors")
         try {
             connectors
                 .toTypedArray()
-                .forEach { it.valueUpdate(name, value) }
+                .forEach {
+                    try {
+                        it.valueUpdate(name, value)
+                    } catch (e: Exception) {
+                        logger.severe("Failed to update value: $value, name: $name, for connector: ${it.javaClass.name}")
+                        e.printStackTrace()
+                    }
+                }
         } catch (e: Exception) {
             logger.severe("Failed to update value: $value, along connectors for name: $name")
             e.printStackTrace()

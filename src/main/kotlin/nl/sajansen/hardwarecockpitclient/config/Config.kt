@@ -12,10 +12,15 @@ object Config {
     var serialMetaBitsValue: Int = 0x05
 
     var asynchronousUpdates: Boolean = true
+    var rotaryMinUpdateInterval: Long = 100
 
     // KeyboardConnector
     var keyPressDownDuration: Int = 80
     var keyPressUpDuration: Int = 20
+
+    // VirtualJoystickConnector
+    var trimMax: Int = 100
+    var buttonToggleDuration: Long = 50
 
     // Logging
     var enableApplicationLoggingToFile: Boolean = true

@@ -1,6 +1,7 @@
 package nl.sajansen.hardwarecockpitclient.hardware.components
 
 
+import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
 import java.util.logging.Logger
 
@@ -41,6 +42,8 @@ class Rotary(override val id: Int, override val name: String) : Component {
         reset()
 
         ConnectorRegister.valueUpdate(name, tempValue)
+        Thread.sleep(Config.rotaryMinUpdateInterval)   // Prevent too much updates at once
+
         updating = false
 
         // Check for value changes happened during update

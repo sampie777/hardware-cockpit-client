@@ -2,12 +2,27 @@ package nl.sajansen.hardwarecockpitclient
 
 import com.fazecast.jSerialComm.SerialPort
 import nl.sajansen.hardwarecockpitclient.config.Config
+import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
 import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
+import nl.sajansen.hardwarecockpitclient.connectors.VirtualJoystickConnector
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.utils.getCurrentJarDirectory
 import java.util.logging.Logger
 
 fun main(args: Array<String>) {
+    if (args.contains("--help")) {
+        println("""
+            Usage: 
+               --list-devices   Show all serial devices
+               --help           Show this message
+               
+               Connectors:
+               --joystick       Enable this connector
+               --keyboard       Enable this connector
+        """.trimIndent())
+        return
+    }
+
     if (args.contains("--list-devices")) {
         listSerialPorts()
         return
@@ -23,7 +38,14 @@ fun main(args: Array<String>) {
     setupLogging(args)
     Config.save()
 
-    KeyboardConnector().enable()
+    if (args.contains("--keyboard")) {
+        KeyboardConnector().enable()
+    }
+
+    if (args.contains("--joystick")) {
+        val virtualJoystickConnector = VirtualJoystickConnector()
+        virtualJoystickConnector.enable()
+    }
 
     val connection = CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
 
@@ -35,15 +57,17 @@ fun main(args: Array<String>) {
 
 fun listSerialPorts() {
     SerialPort.getCommPorts().forEach {
-        println("- ${it.descriptivePortName} [${it.systemPortName}]")
+        println("- ${it.descriptivePortName} \t[${it.systemPortName}]")
     }
 }
 
 fun attachExitCatcher() {
     Runtime.getRuntime().addShutdownHook(object : Thread() {
         override fun run() {
+            println("Exiting application...")
+
             CockpitDevice.disconnect()
-            println("Application will be terminated")
+            ConnectorRegister.disableAll()
         }
     })
 }

@@ -129,10 +129,11 @@ object CockpitDevice : HardwareDevice {
     }
 
     private fun clearComPort() {
-        logger.info("Clearing com port buffer")
+        logger.info("Clearing com port buffer...")
         while (comPort!!.bytesAvailable() > 0) {
             val byteBuffer = ByteArray(comPort!!.bytesAvailable())
             comPort?.readBytes(byteBuffer, byteBuffer.size.toLong())
         }
+        logger.info("Com port buffer cleared")
     }
 }

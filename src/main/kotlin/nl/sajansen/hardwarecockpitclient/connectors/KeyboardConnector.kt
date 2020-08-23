@@ -61,7 +61,7 @@ class KeyboardConnector : Connector {
             CockpitDevice.NAME_SWITCH_LANDING_GEAR -> {
                 when (value as Boolean) {
                     false -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_MASK))
-                    else -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_G, 0))
+                    else -> keyPress(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.SHIFT_MASK))
                 }
             }
 

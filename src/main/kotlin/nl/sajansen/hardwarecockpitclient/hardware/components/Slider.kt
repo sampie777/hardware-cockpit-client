@@ -8,8 +8,10 @@ import java.util.logging.Logger
 class Slider(override val id: Int, override val name: String, private val numberMap: NumberMap? = null) : Component {
     private val logger = Logger.getLogger(Slider::class.java.name)
 
+    @Volatile
     private var value: Int = 0
     private var valueBeforeUpdating: Int = 0
+    @Volatile
     private var updating: Boolean = false
 
     override fun value(): Any? {

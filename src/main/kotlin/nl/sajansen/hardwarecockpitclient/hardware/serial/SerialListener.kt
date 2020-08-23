@@ -5,6 +5,7 @@ import com.fazecast.jSerialComm.SerialPort
 import com.fazecast.jSerialComm.SerialPortDataListener
 import com.fazecast.jSerialComm.SerialPortEvent
 import nl.sajansen.hardwarecockpitclient.config.Config
+import nl.sajansen.hardwarecockpitclient.hardware.CockpitDeviceFeedbackData
 import nl.sajansen.hardwarecockpitclient.hardware.HardwareDevice
 import nl.sajansen.hardwarecockpitclient.hardware.components.Component
 import java.lang.Integer.min
@@ -134,7 +135,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
     }
 
     private fun setComponentWithData(component: Component, value: Int) {
-        logger.info("Calling set() for component: $component")
+        logger.fine("Calling set() for component: $component")
 
         try {
             if (Config.asynchronousUpdates) {
@@ -148,6 +149,7 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
         }
     }
 
+    @ExperimentalUnsignedTypes
     private fun sendSerialDeviceUpdate() {
         logger.fine("Sending heartbeat to serial device")
         if (hardwareDevice.getComPort() == null) {
@@ -155,8 +157,26 @@ class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDat
             return
         }
 
-        val updateBytes = ByteArray(26)
-        updateBytes[0] = hardwareDevice.operationMode.id.toByte()
+        val updateData = CockpitDeviceFeedbackData(
+            hardwareDevice.operationMode.id.toUByte(),
+            0u,
+            0u,
+            80u,
+            0u,
+            1u,
+            0,
+            16383,
+            16383,
+            16383,
+            3u,
+            0u,
+            0u,
+            0,
+            0,
+            0u
+        )
+
+        val updateBytes = updateData.toByteArray()
         hardwareDevice.getComPort()?.writeBytes(updateBytes, updateBytes.size.toLong())
     }
 
