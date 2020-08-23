@@ -3,10 +3,12 @@ package nl.sajansen.hardwarecockpitclient
 import com.fazecast.jSerialComm.SerialPort
 import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
+import nl.sajansen.hardwarecockpitclient.connectors.JoystickConnector
 import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
-import nl.sajansen.hardwarecockpitclient.connectors.VirtualJoystickConnector
+import nl.sajansen.hardwarecockpitclient.gui.MyTrayIcon
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.utils.getCurrentJarDirectory
+import java.awt.EventQueue
 import java.util.logging.Logger
 
 fun main(args: Array<String>) {
@@ -15,10 +17,11 @@ fun main(args: Array<String>) {
             Usage: 
                --list-devices   Show all serial devices
                --help           Show this message
+               --gui            Start application with a GUI (system tray icon)
                
                Connectors:
-               --joystick       Enable this connector
-               --keyboard       Enable this connector
+               --joystick       Enable joystick connector
+               --keyboard       Enable keyboard connector
         """.trimIndent())
         return
     }
@@ -38,21 +41,36 @@ fun main(args: Array<String>) {
     setupLogging(args)
     Config.save()
 
-    if (args.contains("--keyboard")) {
+    if (args.contains("--gui")) {
+        EventQueue.invokeLater {
+            MyTrayIcon().show()
+        }
+        return
+    }
+
+    val connection = connectWithHardware()
+
+    @Suppress("ControlFlowWithEmptyBody")
+    while (connection) {
+    }
+
+    CockpitDevice.disconnect()
+}
+
+fun loadConnectors(args: Array<String> = emptyArray()) {
+    ConnectorRegister.disableAll()
+
+    if (args.contains("--keyboard") || Config.keyboardConnectorEnabled) {
         KeyboardConnector().enable()
     }
 
-    if (args.contains("--joystick")) {
-        val virtualJoystickConnector = VirtualJoystickConnector()
-        virtualJoystickConnector.enable()
+    if (args.contains("--joystick") || Config.joystickConnectorEnabled) {
+        JoystickConnector().enable()
     }
+}
 
-    val connection = CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
-
-    @Suppress("ControlFlowWithEmptyBody")
-    while (connection) {}
-
-    CockpitDevice.disconnect()
+fun connectWithHardware(): Boolean {
+    return CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
 }
 
 fun listSerialPorts() {
@@ -64,10 +82,7 @@ fun listSerialPorts() {
 fun attachExitCatcher() {
     Runtime.getRuntime().addShutdownHook(object : Thread() {
         override fun run() {
-            println("Exiting application...")
-
-            CockpitDevice.disconnect()
-            ConnectorRegister.disableAll()
+            exitApplication()
         }
     })
 }
@@ -80,4 +95,13 @@ private fun setupLogging(args: Array<String>) {
         logger.severe("Failed to initiate logging: $e")
         e.printStackTrace()
     }
+}
+
+fun exitApplication() {
+    println("Exiting application...")
+
+    CockpitDevice.disconnect()
+    ConnectorRegister.disableAll()
+
+    println("Shutdown finished")
 }

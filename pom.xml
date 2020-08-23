@@ -6,10 +6,11 @@
 
     <groupId>nl.sajansen</groupId>
     <artifactId>hardware-cockpit-client</artifactId>
-    <version>0.0.0-SNAPSHOT-12</version>
+    <version>0.0.0-SNAPSHOT-22</version>
     <packaging>jar</packaging>
 
     <name>Hardware Cockpit Client</name>
+    <url>https://github.com/sampie777/hardware-cockpit-client</url>
 
     <properties>
         <author>Samuel-Anton Jansen</author>

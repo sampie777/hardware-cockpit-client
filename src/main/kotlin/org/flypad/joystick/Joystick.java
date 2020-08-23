@@ -49,11 +49,14 @@ public class Joystick implements JoystickConstants {
         if (name == null) {
             throw new NullPointerException();
         }
+        logger.info(name);
         initializeHandle(name);
         resetButtons();
     }
 
-    private void initializeHandle(final String name) throws JoystickException {
+    protected void initializeHandle(final String name) throws JoystickException {
+        logger.info("Getting handle for $name");
+
         WinNT.HANDLE h = Kernel32.INSTANCE.CreateFile(
                 name,
                 Kernel32.GENERIC_WRITE,
@@ -80,7 +83,7 @@ public class Joystick implements JoystickConstants {
         Arrays.fill(digital, DIGITAL_OFF);
     }
 
-    public final synchronized void close() throws JoystickException {
+    public synchronized void close() throws JoystickException {
         if (handle == null) {
             throw new JoystickException("Joystick already closed");
         }
@@ -95,7 +98,7 @@ public class Joystick implements JoystickConstants {
         }
     }
 
-    protected final void finalize() throws Throwable {
+    protected void finalize() throws Throwable {
         try {
             close();
         } catch (Exception e) {
@@ -104,7 +107,11 @@ public class Joystick implements JoystickConstants {
         super.finalize();
     }
 
-    public final void send() throws JoystickException {
+    public void send() throws JoystickException {
+        if (handle == null) {
+            throw new JoystickException("Cannot send, joystick handle is closed");
+        }
+
         /*
          * Copy the data to the joystick state
          */

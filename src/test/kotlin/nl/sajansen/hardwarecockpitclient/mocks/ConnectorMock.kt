@@ -21,8 +21,11 @@ class ConnectorMock : Connector {
 class ConnectorMockWithDelay : Connector {
     private val logger = Logger.getLogger(ConnectorMock::class.java.name)
 
+    @Volatile
     var valueUpdated = false
+    @Volatile
     var valueUpdatedWithKey = ""
+    @Volatile
     var valueUpdatedWithValues: ArrayList<Any?> = arrayListOf()
 
     override fun valueUpdate(name: String, value: Any) {

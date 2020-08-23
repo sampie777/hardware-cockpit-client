@@ -5,7 +5,7 @@ import java.util.logging.Logger
 object ConnectorRegister {
     private val logger = Logger.getLogger(ConnectorRegister::class.java.name)
 
-    private val connectors = hashSetOf<Connector>()
+    val connectors = hashSetOf<Connector>()
 
     fun register(connector: Connector) {
         logger.info("Registering connector: ${connector.javaClass.name}")

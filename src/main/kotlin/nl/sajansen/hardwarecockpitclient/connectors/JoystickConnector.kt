@@ -8,8 +8,8 @@ import org.flypad.joystick.Joystick
 import java.util.*
 import java.util.logging.Logger
 
-class VirtualJoystickConnector : Connector {
-    private val logger = Logger.getLogger(VirtualJoystickConnector::class.java.name)
+class JoystickConnector : Connector {
+    private val logger = Logger.getLogger(JoystickConnector::class.java.name)
 
     var joystick: Joystick? = null
 
@@ -51,7 +51,6 @@ class VirtualJoystickConnector : Connector {
         }
 
         when (name) {
-
             CockpitDevice.NAME_BUTTON_ATC -> toggleButton(0)
             CockpitDevice.NAME_BUTTON_1 -> toggleButton(1)
             CockpitDevice.NAME_BUTTON_2 -> toggleButton(2)
@@ -97,17 +96,17 @@ class VirtualJoystickConnector : Connector {
             }
             CockpitDevice.NAME_ROTARY_TRIM_ELEVATOR -> {
                 elevatorTrimPosition += value as Int
-                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, -Config.trimMax, Config.trimMax)
+                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, -Config.joystickConnectorMaxTrim, Config.joystickConnectorMaxTrim)
                 joystick?.analog?.set(Joystick.ANALOG_ROTATION_X, map.map(elevatorTrimPosition))
             }
             CockpitDevice.NAME_ROTARY_TRIM_AILERONS -> {
                 aileronTrimPosition += value as Int
-                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, -Config.trimMax, Config.trimMax)
+                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, -Config.joystickConnectorMaxTrim, Config.joystickConnectorMaxTrim)
                 joystick?.analog?.set(Joystick.ANALOG_ROTATION_Y, map.map(aileronTrimPosition))
             }
             CockpitDevice.NAME_ROTARY_TRIM_RUDDER -> {
                 rudderTrimPosition += value as Int
-                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, -Config.trimMax, Config.trimMax)
+                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, -Config.joystickConnectorMaxTrim, Config.joystickConnectorMaxTrim)
                 joystick?.analog?.set(Joystick.ANALOG_ROTATION_Z, map.map(rudderTrimPosition))
             }
             else -> return
@@ -116,16 +115,16 @@ class VirtualJoystickConnector : Connector {
         flush()
     }
 
-    private fun toggleButton(buttonIndex: Int, duration: Long = Config.buttonToggleDuration) {
+    fun toggleButton(buttonIndex: Int, duration: Long = Config.joystickConnectorButtonToggleDuration) {
         joystick?.digital?.set(buttonIndex, Joystick.DIGITAL_ON)
         clearButtonStateAfterTimeout(buttonIndex, duration)
     }
 
-    private fun toggleButtons(
+    fun toggleButtons(
         buttonOnIndex: Int,
         buttonOffIndex: Int,
         value: Boolean,
-        duration: Long = Config.buttonToggleDuration
+        duration: Long = Config.joystickConnectorButtonToggleDuration
     ) {
         val buttonIndex = if (value) buttonOnIndex else buttonOffIndex
         joystick?.digital?.set(buttonIndex, Joystick.DIGITAL_ON)
@@ -151,7 +150,7 @@ class VirtualJoystickConnector : Connector {
 }
 
 class ClearButtonStateTimerTask(
-    private val connector: VirtualJoystickConnector,
+    private val connector: JoystickConnector,
     private val buttonIndex: Int
 ) : TimerTask() {
     private val logger = Logger.getLogger(ClearButtonStateTimerTask::class.java.name)

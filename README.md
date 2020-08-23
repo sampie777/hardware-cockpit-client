@@ -12,6 +12,8 @@ Install for the virtual joystick driver. Create a joystick "PPJoy Virtual Joysti
 
 Edit its mappings to 8 axes, 24 buttons, and 0 POVs.
 
+Thanks to https://github.com/dumbledore/FlypadJoystick for this integration.
+
 ## Config
 
 - hardwareDeviceComName: Execute jar with `--list-devices` option to get a list of available serial devices. Copy the name of the preferred device (excluding the port name between brackets). Insert this in the properties file (generated when jar gets executed without parameters).
@@ -19,7 +21,7 @@ Edit its mappings to 8 axes, 24 buttons, and 0 POVs.
 
 `HardwareDevice` contains the virtual copy of the hardware device.
 
-`Connector`s are output variations. `KeyboardConnector` will execute keystrokes for inputs as specified in its code.
+`Connector`s are output variations. `KeyboardConnector` will execute keystrokes for inputs as specified in its code. `JoystickConnector` will send values to PPJoy to act as a joystick. 
 
 Signal flow:
 ```
@@ -30,7 +32,8 @@ Hardware  --USB-->  SerialListener (-> HardwareDevice) -> Component -> Connector
 
 ### Parameters
 
-- `--list-devices`
-- `--help`
-- `--virtual-joystick`
-- `--keyboard`
+- `--list-devices` Prints a list of all available COM devices
+- `--help` Prints a list of available commands
+- `--gui` Start the application using the GUI (system tray icon)
+- `--joystick` Enable joystick controller
+- `--keyboard` Enable keyboard controller

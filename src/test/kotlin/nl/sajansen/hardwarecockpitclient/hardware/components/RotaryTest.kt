@@ -27,7 +27,10 @@ class RotaryTest {
         Thread { component.set(11) }.start()
         Thread.sleep(5)
         component.set(-3)
-        Thread.sleep(50) // Wait for ConnecterMock2 to complete update task of 20 ms
+
+        // Wait for ConnecterMock2 to complete update task
+        val startTime = System.currentTimeMillis()
+        while (testConnector.valueUpdatedWithValues.size < 2 && (System.currentTimeMillis() - 1000) < startTime) {}
 
         assertTrue(testConnector.valueUpdated)
         assertEquals(2, testConnector.valueUpdatedWithValues.size)

@@ -15,12 +15,14 @@ object Config {
     var rotaryMinUpdateInterval: Long = 100
 
     // KeyboardConnector
-    var keyPressDownDuration: Int = 80
-    var keyPressUpDuration: Int = 20
+    var keyboardConnectorEnabled: Boolean = true
+    var KeyboardConnectorKeyPressDownDuration: Int = 80
+    var KeyboardConnectorKeyPressUpDuration: Int = 20
 
-    // VirtualJoystickConnector
-    var trimMax: Int = 100
-    var buttonToggleDuration: Long = 50
+    // JoystickConnector
+    var joystickConnectorEnabled: Boolean = true
+    var joystickConnectorMaxTrim: Int = 100
+    var joystickConnectorButtonToggleDuration: Long = 50
 
     // Logging
     var enableApplicationLoggingToFile: Boolean = true
@@ -37,6 +39,7 @@ object Config {
     }
 
     fun save() {
+        logger.info("Saving config")
         try {
             if (PropertyLoader.saveConfig(this::class.java)) {
                 PropertyLoader.save()

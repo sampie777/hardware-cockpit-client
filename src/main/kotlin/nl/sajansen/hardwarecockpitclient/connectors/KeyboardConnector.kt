@@ -154,7 +154,7 @@ class KeyboardConnector : Connector {
                 robot.keyPress(keyCode2)
             }
 
-            robot.delay(Config.keyPressDownDuration)
+            robot.delay(Config.KeyboardConnectorKeyPressDownDuration)
 
             if (keyCode2 != null) {
                 robot.keyRelease(keyCode2)
@@ -170,7 +170,7 @@ class KeyboardConnector : Connector {
             if (keyEvent1.modifiers.and(KeyEvent.CTRL_MASK) != 0) {
                 robot.keyRelease(KeyEvent.VK_CONTROL)
             }
-            robot.delay(Config.keyPressUpDuration)
+            robot.delay(Config.KeyboardConnectorKeyPressUpDuration)
         } catch (e: Exception) {
             logger.warning("Failed to execute key stroke ${keyEvent1.readableString()} (keyCode2: $keyCode2)")
             e.printStackTrace()
