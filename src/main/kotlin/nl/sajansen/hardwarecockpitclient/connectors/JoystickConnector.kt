@@ -105,7 +105,10 @@ class JoystickConnector : Connector {
                 joystick2?.analog?.set(Joystick.ANALOG_ROTATION_X, Joystick.ANALOG_MID)
                 joystick2?.analog?.set(Joystick.ANALOG_ROTATION_Y, Joystick.ANALOG_MID)
                 joystick2?.analog?.set(Joystick.ANALOG_ROTATION_Z, Joystick.ANALOG_MID)
-
+                elevatorTrimPosition = 0
+                aileronTrimPosition = 0
+                rudderTrimPosition = 0
+                joystick2?.flush()
             }
             CockpitDevice.NAME_BUTTON_D -> toggleButton(joystick1!!, 15)
             CockpitDevice.NAME_BUTTON_PAUSE -> toggleButton(joystick1!!, 16)
