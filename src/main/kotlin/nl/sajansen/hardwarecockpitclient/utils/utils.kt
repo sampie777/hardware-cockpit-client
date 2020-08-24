@@ -61,4 +61,4 @@ fun getFileExtension(file: File): String {
 
 fun Date.format(format: String): String? = SimpleDateFormat(format).format(this)
 
-fun isWindowsPlatform(): Boolean = System.getProperty("os.name").contains("win")
+fun isWindowsPlatform(): Boolean = System.getProperty("os.name").toLowerCase().contains("win")

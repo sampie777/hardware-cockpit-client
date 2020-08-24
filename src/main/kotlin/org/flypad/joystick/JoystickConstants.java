@@ -27,5 +27,5 @@ public interface JoystickConstants {
     public static final byte DIGITAL_ON = 1;
 
     public static final byte NUM_ANALOG = 8;
-    public static final byte NUM_DIGITAL = 24;
+    public static final byte NUM_DIGITAL = 32;
 }

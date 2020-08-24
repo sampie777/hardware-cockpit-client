@@ -9,6 +9,7 @@ import nl.sajansen.hardwarecockpitclient.mocks.HardwareDeviceMock
 import kotlin.test.*
 
 
+@ExperimentalUnsignedTypes
 class SerialListenerTest {
 
     private val hardwareDevice = HardwareDeviceMock()

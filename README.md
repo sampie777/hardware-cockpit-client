@@ -6,11 +6,11 @@
 ### PPJoy
 
 https://github.com/elitak/PPJoy/releases.
-Install for the virtual joystick driver. Create a joystick "PPJoy Virtual Joystick 1" using the configuration:
+Install for the virtual joystick driver. Create two joysticks "PPJoy Virtual Joystick 1" and "PPJoy Virtual Joystick 2" using the configuration:
 - Parallel port: Virtual Joysticks
-- Controller number: Controller 2
+- Controller number: Controller 1 (for the second one: Controller 2)
 
-Edit its mappings to 8 axes, 24 buttons, and 0 POVs.
+Edit their mappings to 8 axes, 32 buttons, and 0 POVs.
 
 Thanks to https://github.com/dumbledore/FlypadJoystick for this integration.
 
@@ -39,6 +39,8 @@ Hardware  --USB-->  SerialListener (-> HardwareDevice) -> Component -> Connector
 
 - `--list-devices` Prints a list of all available COM devices
 - `--help` Prints a list of available commands
-- `--gui` Start the application using the GUI (system tray icon)
+- `--headless` Start the application without the GUI (system tray icon)
+- `--disconnect` Disable connection with hardware
 - `--joystick` Enable joystick controller
 - `--keyboard` Enable keyboard controller
+- `--emulator` Enable hardware emulator (opens in a new window)

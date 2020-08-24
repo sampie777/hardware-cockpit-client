@@ -4,7 +4,8 @@
   <groupId>nl.sajansen</groupId>
   <artifactId>hardware-cockpit-client</artifactId>
   <name>Hardware Cockpit Client</name>
-  <version>0.0.0-SNAPSHOT-21</version>
+  <version>0.0.0-SNAPSHOT-23</version>
+  <url>https://github.com/sampie777/hardware-cockpit-client</url>
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>

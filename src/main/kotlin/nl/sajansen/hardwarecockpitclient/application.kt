@@ -21,7 +21,7 @@ fun main(args: Array<String>) {
             Usage: 
                --list-devices   Show all serial devices
                --help           Show this message
-               --gui            Start application with a GUI (system tray icon)
+               --headless       Start application without a GUI (system tray icon)
                --disconnect     Don't connect with the hardware
                
                Connectors:
@@ -53,7 +53,7 @@ fun main(args: Array<String>) {
         }
     }
 
-    if (args.contains("--gui")) {
+    if (!args.contains("--headless")) {
         EventQueue.invokeLater {
             MyTrayIcon().show()
         }

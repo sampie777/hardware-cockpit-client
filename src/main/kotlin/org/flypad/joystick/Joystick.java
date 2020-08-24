@@ -22,6 +22,8 @@ import java.util.logging.Logger;
 public class Joystick implements JoystickConstants {
     Logger logger = Logger.getLogger(getClass().getName());
 
+    public String name;
+
     public static final String DEFAULT_NAME = "\\\\.\\PPJoyIOCTL1";
 
     /**
@@ -45,17 +47,22 @@ public class Joystick implements JoystickConstants {
         this(DEFAULT_NAME);
     }
 
+    public Joystick(int number) throws JoystickException {
+        this(DEFAULT_NAME.replace("1", String.valueOf(number)));
+    }
+
     public Joystick(final String name) throws JoystickException {
         if (name == null) {
             throw new NullPointerException();
         }
-        logger.info(name);
+        logger.info("Initialzing joystick: " + name);
+        this.name = name;
         initializeHandle(name);
         resetButtons();
     }
 
     protected void initializeHandle(final String name) throws JoystickException {
-        logger.info("Getting handle for $name");
+        logger.info("Getting handle for: " + name);
 
         WinNT.HANDLE h = Kernel32.INSTANCE.CreateFile(
                 name,
@@ -84,8 +91,9 @@ public class Joystick implements JoystickConstants {
     }
 
     public synchronized void close() throws JoystickException {
+        logger.info("Closing joystick " + name);
         if (handle == null) {
-            throw new JoystickException("Joystick already closed");
+            throw new JoystickException("Joystick " + name + " already closed");
         }
 
         Kernel32.INSTANCE.CloseHandle(handle);
@@ -107,9 +115,20 @@ public class Joystick implements JoystickConstants {
         super.finalize();
     }
 
+
+    public void flush() {
+        logger.fine("Flushing joystick " + name + " data");
+        try {
+            send();
+        } catch (Throwable e) {
+            logger.severe("Failed to set joystick " + name + " data");
+            e.printStackTrace();
+        }
+    }
+
     public void send() throws JoystickException {
         if (handle == null) {
-            throw new JoystickException("Cannot send, joystick handle is closed");
+            throw new JoystickException("Cannot send, joystick " + name + " handle is closed");
         }
 
         /*
@@ -134,7 +153,7 @@ public class Joystick implements JoystickConstants {
 
         if (rc != 0) {
             throw new JoystickException(
-                    "DeviceIoControl error. Error code: " + rc);
+                    "DeviceIoControl error for joystick " + name + " . Error code: " + rc);
         }
     }
 }

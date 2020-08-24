@@ -12,6 +12,8 @@ import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
 import nl.sajansen.hardwarecockpitclient.gui.emulator.HardwareEmulatorFrame
 import nl.sajansen.hardwarecockpitclient.loadConnectors
 import java.awt.*
+import java.awt.event.MouseEvent
+import java.awt.event.MouseListener
 import java.util.logging.Logger
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
@@ -137,6 +139,22 @@ class MyTrayIcon {
         trayIcon = TrayIcon(image, ApplicationInfo.name, popup)
         trayIcon?.isImageAutoSize = true
         trayIcon?.toolTip = ApplicationInfo.name
+        trayIcon?.addActionListener { logger.info("I got clicked by an actionlistener") }
+        trayIcon?.addMouseListener(object : MouseListener {
+            override fun mouseReleased(event: MouseEvent) {}
+
+            override fun mouseEntered(event: MouseEvent) {}
+
+            override fun mouseClicked(event: MouseEvent) {
+                logger.info("I got clicked by an mouselistener")
+            }
+
+            override fun mouseExited(event: MouseEvent) {}
+
+            override fun mousePressed(event: MouseEvent) {
+                logger.info("I got pressed by an mouselistener")
+            }
+        })
 
         val tray = SystemTray.getSystemTray()
         try {
@@ -157,6 +175,7 @@ class MyTrayIcon {
                 logger.info("Setting new hardware device to: ${port.descriptivePortName}")
                 Config.hardwareDeviceComName = port.descriptivePortName
                 Config.save()
+
                 updateSerialDeviceMenu()
             }
 
@@ -165,7 +184,7 @@ class MyTrayIcon {
 
         serialDeviceMenu.addSeparator()
 
-        CheckboxMenuItem("Disable connection").also {
+        CheckboxMenuItem("Enable connection").also {
             it.state = Config.hardwareDeviceConnect
             it.addItemListener { _ ->
                 Config.hardwareDeviceConnect = it.state
