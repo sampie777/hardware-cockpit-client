@@ -12,8 +12,6 @@ import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
 import nl.sajansen.hardwarecockpitclient.gui.emulator.HardwareEmulatorFrame
 import nl.sajansen.hardwarecockpitclient.loadConnectors
 import java.awt.*
-import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
 import java.util.logging.Logger
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
@@ -69,7 +67,6 @@ class MyTrayIcon {
             }
         }
 
-        serialDeviceMenu.addActionListener { logger.info("Hey, I've got an action!") }
         updateSerialDeviceMenu()
 
         val settingsMenu = Menu("Settings")
@@ -139,22 +136,6 @@ class MyTrayIcon {
         trayIcon = TrayIcon(image, ApplicationInfo.name, popup)
         trayIcon?.isImageAutoSize = true
         trayIcon?.toolTip = ApplicationInfo.name
-        trayIcon?.addActionListener { logger.info("I got clicked by an actionlistener") }
-        trayIcon?.addMouseListener(object : MouseListener {
-            override fun mouseReleased(event: MouseEvent) {}
-
-            override fun mouseEntered(event: MouseEvent) {}
-
-            override fun mouseClicked(event: MouseEvent) {
-                logger.info("I got clicked by an mouselistener")
-            }
-
-            override fun mouseExited(event: MouseEvent) {}
-
-            override fun mousePressed(event: MouseEvent) {
-                logger.info("I got pressed by an mouselistener")
-            }
-        })
 
         val tray = SystemTray.getSystemTray()
         try {

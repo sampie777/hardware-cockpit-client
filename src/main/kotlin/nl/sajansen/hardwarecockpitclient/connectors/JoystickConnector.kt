@@ -128,7 +128,8 @@ class JoystickConnector : Connector {
             }
 
             CockpitDevice.NAME_ROTARY_TRIM_ELEVATOR -> {
-                toggleButtons(joystick2!!, 8, 9, (value as Int) != 0, async = false)
+                toggleButtons(joystick2!!, 8, 9, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
+                logger.info("Value for trim elevator: $value")
 
                 elevatorTrimPosition += value
                 val map = NumberMap(
@@ -137,10 +138,11 @@ class JoystickConnector : Connector {
                     -Config.joystickConnectorMaxTrim,
                     Config.joystickConnectorMaxTrim
                 )
+                logger.info("Analog X axis value for trim elevator: ${map.map(elevatorTrimPosition)}")
                 joystick2?.analog?.set(Joystick.ANALOG_ROTATION_X, map.map(elevatorTrimPosition))
             }
             CockpitDevice.NAME_ROTARY_TRIM_AILERONS -> {
-                toggleButtons(joystick2!!, 10, 11, (value as Int) != 0, async = false)
+                toggleButtons(joystick2!!, 10, 11, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
 
                 aileronTrimPosition += value
                 val map = NumberMap(
@@ -152,7 +154,7 @@ class JoystickConnector : Connector {
                 joystick2?.analog?.set(Joystick.ANALOG_ROTATION_Y, map.map(aileronTrimPosition))
             }
             CockpitDevice.NAME_ROTARY_TRIM_RUDDER -> {
-                toggleButtons(joystick2!!, 12, 13, (value as Int) != 0, async = false)
+                toggleButtons(joystick2!!, 12, 13, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
 
                 rudderTrimPosition += value
                 val map = NumberMap(
@@ -163,16 +165,13 @@ class JoystickConnector : Connector {
                 )
                 joystick2?.analog?.set(Joystick.ANALOG_ROTATION_Z, map.map(rudderTrimPosition))
             }
-            CockpitDevice.NAME_ROTARY_AP_SPEED -> toggleButtons(joystick2!!, 14, 15, value as Boolean, async = false)
-            CockpitDevice.NAME_ROTARY_AP_HEADING -> toggleButtons(joystick2!!, 16, 17, value as Boolean, async = false)
-            CockpitDevice.NAME_ROTARY_AP_ALTITUDE -> toggleButtons(joystick2!!, 18, 19, value as Boolean, async = false)
-            CockpitDevice.NAME_ROTARY_AP_VSPEED -> toggleButtons(joystick2!!, 20, 21, value as Boolean, async = false)
-            CockpitDevice.NAME_ROTARY_E -> toggleButtons(joystick2!!, 22, 23, value as Boolean, async = false)
+            CockpitDevice.NAME_ROTARY_AP_SPEED -> toggleButtons(joystick2!!, 14, 15, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
+            CockpitDevice.NAME_ROTARY_AP_HEADING -> toggleButtons(joystick2!!, 16, 17, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
+            CockpitDevice.NAME_ROTARY_AP_ALTITUDE -> toggleButtons(joystick2!!, 18, 19, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
+            CockpitDevice.NAME_ROTARY_AP_VSPEED -> toggleButtons(joystick2!!, 20, 21, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
+            CockpitDevice.NAME_ROTARY_E -> toggleButtons(joystick2!!, 22, 23, (value as Int) != 0, async = Config.joystickConnectorTrimAsync)
             else -> return
         }
-
-        joystick1?.flush()
-        joystick2?.flush()
     }
 
     fun toggleButtons(
@@ -194,12 +193,14 @@ class JoystickConnector : Connector {
         async: Boolean = true
     ) {
         joystick.digital[buttonIndex] = Joystick.DIGITAL_ON
+        joystick.flush()
 
         if (async) {
             clearButtonStateAfterTimeout(joystick, buttonIndex, duration)
         } else {
             Thread.sleep(duration)
             joystick.digital[buttonIndex] = Joystick.DIGITAL_OFF
+            joystick.flush()
         }
     }
 

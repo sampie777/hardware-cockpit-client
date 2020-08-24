@@ -4,7 +4,10 @@ import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.mocks.JoystickMock
 import org.flypad.joystick.Joystick
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 
 class JoystickConnectorTest {
@@ -39,7 +42,8 @@ class JoystickConnectorTest {
         // When
         connector.toggleButton(joystick, 0, duration = 20)
 
-        assertFalse(joystick.isSend)
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
         assertEquals(Joystick.DIGITAL_ON, joystick.digital[0])
 
         // When wait
@@ -59,7 +63,8 @@ class JoystickConnectorTest {
         // When
         connector.toggleButtons(joystick, 0, 1, true, duration = 50)
 
-        assertFalse(joystick.isSend)
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
         assertEquals(Joystick.DIGITAL_ON, joystick.digital[0])
         assertEquals(Joystick.DIGITAL_OFF, joystick.digital[1])
 

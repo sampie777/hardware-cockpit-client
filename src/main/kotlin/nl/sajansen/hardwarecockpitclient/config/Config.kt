@@ -17,13 +17,14 @@ object Config {
     var ignoreWindowsPlatformCheck: Boolean = false
 
     // KeyboardConnector
-    var keyboardConnectorEnabled: Boolean = true
+    var keyboardConnectorEnabled: Boolean = false
     var KeyboardConnectorKeyPressDownDuration: Int = 80
     var KeyboardConnectorKeyPressUpDuration: Int = 20
 
     // JoystickConnector
     var joystickConnectorEnabled: Boolean = true
     var joystickConnectorMaxTrim: Int = 100
+    var joystickConnectorTrimAsync: Boolean = false
     var joystickConnectorButtonToggleDuration: Long = 50
 
     // HardwareDeviceEmulatorConnector
