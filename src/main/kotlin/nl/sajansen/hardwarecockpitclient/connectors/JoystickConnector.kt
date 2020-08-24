@@ -38,7 +38,7 @@ class JoystickConnector : Connector {
             null
         }
 
-        if (joystick1 == null && joystick2 == null) {
+        if (joystick1 == null || joystick2 == null) {
             logger.warning("No joysticks successfully created, disabling controller")
             disable()
         }
@@ -67,8 +67,8 @@ class JoystickConnector : Connector {
     private var rudderTrimPosition: Int = 0
 
     override fun valueUpdate(name: String, value: Any) {
-        if (joystick1 == null) {
-            logger.severe("Joystick never initialized!")
+        if (joystick1 == null || joystick2 == null) {
+            logger.severe("Joystick(s) never initialized!")
             return
         }
 

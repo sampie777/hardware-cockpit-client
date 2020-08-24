@@ -89,6 +89,7 @@ class JoystickConnectorTest {
     fun testTrim() {
         val joystick = JoystickMock()
         val connector = JoystickConnector()
+        connector.joystick1 = JoystickMock()
         connector.joystick2 = joystick
         assertEquals(16384, joystick.analog[Joystick.ANALOG_ROTATION_X])
 
@@ -96,7 +97,7 @@ class JoystickConnectorTest {
         connector.valueUpdate(CockpitDevice.NAME_ROTARY_TRIM_ELEVATOR, 0)
 
         assertTrue(joystick.isSend)
-        assertEquals(0, joystick.digital[37])   // Test the non-async waiting for releasing the button
+        assertEquals(0, joystick.digital[8])   // Test the non-async waiting for releasing the button
         assertEquals(0, connector.elevatorTrimPosition)
         assertEquals(16384, joystick.analog[Joystick.ANALOG_ROTATION_X])
 
