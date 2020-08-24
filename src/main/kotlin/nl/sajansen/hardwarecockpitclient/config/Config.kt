@@ -7,12 +7,14 @@ import java.util.logging.Logger
 object Config {
     private val logger = Logger.getLogger(Config.toString())
 
+    var hardwareDeviceConnect: Boolean = true
     var hardwareDeviceComName: String = "USB-to-Serial Port (ch341-uart)"
     var hardwareDeviceComBaudRate: Int = 115200
     var serialMetaBitsValue: Int = 0x05
 
     var asynchronousUpdates: Boolean = true
     var rotaryMinUpdateInterval: Long = 100
+    var ignoreWindowsPlatformCheck: Boolean = false
 
     // KeyboardConnector
     var keyboardConnectorEnabled: Boolean = true
@@ -23,6 +25,10 @@ object Config {
     var joystickConnectorEnabled: Boolean = true
     var joystickConnectorMaxTrim: Int = 100
     var joystickConnectorButtonToggleDuration: Long = 50
+
+    // HardwareDeviceEmulatorConnector
+    var hardwareDeviceEmulatorConnectorEnabled: Boolean = false
+    var hardwareDeviceEmulatorConnectorHighlightDuration: Long = 200L
 
     // Logging
     var enableApplicationLoggingToFile: Boolean = true

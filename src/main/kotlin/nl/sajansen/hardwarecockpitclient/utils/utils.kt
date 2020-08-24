@@ -1,4 +1,5 @@
 package nl.sajansen.hardwarecockpitclient.utils
+
 import java.io.File
 import java.io.UnsupportedEncodingException
 import java.net.URLDecoder
@@ -59,3 +60,5 @@ fun getFileExtension(file: File): String {
 }
 
 fun Date.format(format: String): String? = SimpleDateFormat(format).format(this)
+
+fun isWindowsPlatform(): Boolean = System.getProperty("os.name").contains("win")

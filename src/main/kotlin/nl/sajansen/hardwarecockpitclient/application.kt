@@ -3,13 +3,17 @@ package nl.sajansen.hardwarecockpitclient
 import com.fazecast.jSerialComm.SerialPort
 import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
+import nl.sajansen.hardwarecockpitclient.connectors.HardwareDeviceEmulatorConnector
 import nl.sajansen.hardwarecockpitclient.connectors.JoystickConnector
 import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
 import nl.sajansen.hardwarecockpitclient.gui.MyTrayIcon
+import nl.sajansen.hardwarecockpitclient.gui.emulator.HardwareEmulatorFrame
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.utils.getCurrentJarDirectory
 import java.awt.EventQueue
 import java.util.logging.Logger
+
+val logger = Logger.getLogger("Application")
 
 fun main(args: Array<String>) {
     if (args.contains("--help")) {
@@ -18,10 +22,12 @@ fun main(args: Array<String>) {
                --list-devices   Show all serial devices
                --help           Show this message
                --gui            Start application with a GUI (system tray icon)
+               --disconnect     Don't connect with the hardware
                
                Connectors:
                --joystick       Enable joystick connector
                --keyboard       Enable keyboard connector
+               --emulator       Enable emulator connector. Also shows emulator window.
         """.trimIndent())
         return
     }
@@ -33,13 +39,19 @@ fun main(args: Array<String>) {
 
     attachExitCatcher()
 
-    val logger = Logger.getLogger("Application")
     logger.info("Executing JAR directory: " + getCurrentJarDirectory(Config).absolutePath)
 
     Config.enableWriteToFile(true)
     Config.load()
     setupLogging(args)
+    Config.hardwareDeviceEmulatorConnectorEnabled = false   // Don't start with it as true
     Config.save()
+
+    if (args.contains("--emulator")) {
+        EventQueue.invokeLater {
+            HardwareEmulatorFrame.createAndShow()
+        }
+    }
 
     if (args.contains("--gui")) {
         EventQueue.invokeLater {
@@ -48,7 +60,9 @@ fun main(args: Array<String>) {
         return
     }
 
-    val connection = connectWithHardware()
+    loadConnectors(args)
+
+    val connection = connectWithHardware(args)
 
     @Suppress("ControlFlowWithEmptyBody")
     while (connection) {
@@ -60,6 +74,10 @@ fun main(args: Array<String>) {
 fun loadConnectors(args: Array<String> = emptyArray()) {
     ConnectorRegister.disableAll()
 
+    if (args.contains("--emulator") || Config.hardwareDeviceEmulatorConnectorEnabled) {
+        HardwareDeviceEmulatorConnector().enable()
+    }
+
     if (args.contains("--keyboard") || Config.keyboardConnectorEnabled) {
         KeyboardConnector().enable()
     }
@@ -69,13 +87,19 @@ fun loadConnectors(args: Array<String> = emptyArray()) {
     }
 }
 
-fun connectWithHardware(): Boolean {
+fun connectWithHardware(args: Array<String> = emptyArray()): Boolean {
+    if (!Config.hardwareDeviceConnect || args.contains("--disconnect")) {
+        logger.info("Hardware connection is turned off")
+        return true
+    }
+
     return CockpitDevice.connect(Config.hardwareDeviceComName, Config.hardwareDeviceComBaudRate)
 }
 
 fun listSerialPorts() {
     SerialPort.getCommPorts().forEach {
         println("- ${it.descriptivePortName} \t[${it.systemPortName}]")
+        logger.info("- ${it.descriptivePortName} \t[${it.systemPortName}]")
     }
 }
 
@@ -88,7 +112,6 @@ fun attachExitCatcher() {
 }
 
 private fun setupLogging(args: Array<String>) {
-    val logger = Logger.getLogger("Application")
     try {
         LogService.setup(args)
     } catch (e: Exception) {
@@ -98,10 +121,10 @@ private fun setupLogging(args: Array<String>) {
 }
 
 fun exitApplication() {
-    println("Exiting application...")
+    logger.info("Exiting application...")
 
     CockpitDevice.disconnect()
     ConnectorRegister.disableAll()
 
-    println("Shutdown finished")
+    logger.info("Shutdown finished")
 }

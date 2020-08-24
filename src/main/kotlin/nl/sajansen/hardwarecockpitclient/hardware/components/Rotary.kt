@@ -19,6 +19,10 @@ class Rotary(override val id: Int, override val name: String) : Component {
         return temp
     }
 
+    fun rawValue(): Int {
+        return value
+    }
+
     override fun set(newRawValue: Int) {
         value += newRawValue
         logger.info("Increasing rotary '$name' value to: $value, with: $newRawValue")

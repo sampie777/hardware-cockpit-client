@@ -18,10 +18,15 @@ Thanks to https://github.com/dumbledore/FlypadJoystick for this integration.
 
 - hardwareDeviceComName: Execute jar with `--list-devices` option to get a list of available serial devices. Copy the name of the preferred device (excluding the port name between brackets). Insert this in the properties file (generated when jar gets executed without parameters).
 - serialMetaBitsValue: Meta code for the device communication
+- ignoreWindowsPlatformCheck: Set this to true to force Windows platform specific/dependent functions to execute on other platforms (may cause crashed!)
+- hardwareDeviceConnect: Set this to false in order to disable connection with hardware
 
 `HardwareDevice` contains the virtual copy of the hardware device.
 
-`Connector`s are output variations. `KeyboardConnector` will execute keystrokes for inputs as specified in its code. `JoystickConnector` will send values to PPJoy to act as a joystick. 
+`Connector`s are output variations. 
+`KeyboardConnector` will execute keystrokes for inputs as specified in its code. 
+`JoystickConnector` will send values to PPJoy to act as a joystick. 
+`HardwareDeviceEmulatorConnector` is used to connect inputs to the virtual hardware emulator. Also, buttons and switches in the emulator will send a signal to the Component when clicked.
 
 Signal flow:
 ```

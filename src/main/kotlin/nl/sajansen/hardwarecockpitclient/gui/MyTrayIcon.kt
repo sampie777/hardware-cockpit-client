@@ -6,8 +6,10 @@ import nl.sajansen.hardwarecockpitclient.ApplicationInfo
 import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.connectWithHardware
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
+import nl.sajansen.hardwarecockpitclient.connectors.HardwareDeviceEmulatorConnector
 import nl.sajansen.hardwarecockpitclient.connectors.JoystickConnector
 import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
+import nl.sajansen.hardwarecockpitclient.gui.emulator.HardwareEmulatorFrame
 import nl.sajansen.hardwarecockpitclient.loadConnectors
 import java.awt.*
 import java.util.logging.Logger
@@ -28,16 +30,6 @@ class MyTrayIcon {
             return
         }
 
-        // Create a pop-up menu components
-        val startItem = MenuItem("Start").also {
-            it.addActionListener { _ ->
-                it.isEnabled = false
-                it.name = "Running..."
-                trayIcon?.toolTip = "${ApplicationInfo.name}: running"
-                loadConnectors()
-                connectWithHardware()
-            }
-        }
         val keyboardSettingItem = CheckboxMenuItem("Keyboard").also { it ->
             it.state = Config.keyboardConnectorEnabled
             it.addItemListener { _ ->
@@ -45,6 +37,7 @@ class MyTrayIcon {
                 Config.keyboardConnectorEnabled = it.state
                 Config.save()
 
+                // Live reload, if the hardware is running
                 ConnectorRegister.connectors
                     .filterIsInstance<KeyboardConnector>()
                     .toTypedArray()
@@ -62,6 +55,7 @@ class MyTrayIcon {
                 Config.joystickConnectorEnabled = it.state
                 Config.save()
 
+                // Live reload, if the hardware is running
                 ConnectorRegister.connectors
                     .filterIsInstance<JoystickConnector>()
                     .toTypedArray()
@@ -70,6 +64,42 @@ class MyTrayIcon {
                 if (it.state) {
                     JoystickConnector().enable()
                 }
+            }
+        }
+
+        serialDeviceMenu.addActionListener { logger.info("Hey, I've got an action!") }
+        updateSerialDeviceMenu()
+
+        val settingsMenu = Menu("Settings")
+        settingsMenu.add(serialDeviceMenu)
+        settingsMenu.addSeparator()
+        settingsMenu.add(keyboardSettingItem)
+        settingsMenu.add(joystickSettingItem)
+
+        // Create a pop-up menu components
+        val startItem = MenuItem("Start").also {
+            it.addActionListener { _ ->
+                it.isEnabled = false
+                it.name = "Running..."
+                trayIcon?.toolTip = "${ApplicationInfo.name}: running"
+                loadConnectors()
+                connectWithHardware()
+            }
+        }
+        val emulatorItem = MenuItem("Emulator").also {
+            it.addActionListener { _ ->
+                logger.info("Enabling hardwareDeviceEmulatorConnectorEnabled")
+                Config.hardwareDeviceEmulatorConnectorEnabled = true
+
+                EventQueue.invokeLater { HardwareEmulatorFrame.createAndShow() }
+
+                // Live reload, if the hardware is running
+                ConnectorRegister.connectors
+                    .filterIsInstance<HardwareDeviceEmulatorConnector>()
+                    .toTypedArray()
+                    .forEach { connector -> connector.disable() }
+
+                HardwareDeviceEmulatorConnector().enable()
             }
         }
         val infoItem = MenuItem("Info").also {
@@ -94,31 +124,15 @@ class MyTrayIcon {
             }
         }
 
-        serialDeviceMenu.addActionListener { logger.info("Hey, I've got an action!") }
-        updateSerialDeviceMenu()
-
-        val settingsMenu = Menu("Settings")
-        settingsMenu.add(serialDeviceMenu)
-        settingsMenu.addSeparator()
-        settingsMenu.add(keyboardSettingItem)
-        settingsMenu.add(joystickSettingItem)
-
         val popup = PopupMenu()
         popup.add(startItem)
+        popup.add(emulatorItem)
         popup.add(settingsMenu)
         popup.add(infoItem)
         popup.addSeparator()
         popup.add(exitItem)
 
-        val image = try {
-            val resource =
-                MyTrayIcon::class.java.classLoader.getResource("nl/sajansen/hardwarecockpitclient/icon-16.png")
-            Toolkit.getDefaultToolkit().getImage(resource)
-        } catch (e: Exception) {
-            logger.warning("Failed to load tray icon image")
-            e.printStackTrace()
-            null
-        }
+        val image = loadImage("/nl/sajansen/hardwarecockpitclient/icon-16.png")
 
         trayIcon = TrayIcon(image, ApplicationInfo.name, popup)
         trayIcon?.isImageAutoSize = true
@@ -147,6 +161,17 @@ class MyTrayIcon {
             }
 
             serialDeviceMenu.add(deviceItem)
+        }
+
+        serialDeviceMenu.addSeparator()
+
+        CheckboxMenuItem("Disable connection").also {
+            it.state = Config.hardwareDeviceConnect
+            it.addItemListener { _ ->
+                Config.hardwareDeviceConnect = it.state
+                Config.save()
+            }
+            serialDeviceMenu.add(it)
         }
     }
 }

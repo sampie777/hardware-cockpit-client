@@ -4,6 +4,7 @@ package nl.sajansen.hardwarecockpitclient.connectors
 import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.utils.NumberMap
+import nl.sajansen.hardwarecockpitclient.utils.isWindowsPlatform
 import org.flypad.joystick.Joystick
 import java.util.*
 import java.util.logging.Logger
@@ -14,6 +15,10 @@ class JoystickConnector : Connector {
     var joystick: Joystick? = null
 
     override fun enable() {
+        if (!Config.ignoreWindowsPlatformCheck && !isWindowsPlatform()) {
+            logger.warning("${javaClass.name} is not supported on non Windows platforms. If you really want to do this, turn on the configuration property: ignoreWindowsPlatformCheck")
+            return
+        }
         super.enable()
 
         try {
@@ -51,16 +56,16 @@ class JoystickConnector : Connector {
         }
 
         when (name) {
-            CockpitDevice.NAME_BUTTON_ATC -> toggleButton(0)
-            CockpitDevice.NAME_BUTTON_1 -> toggleButton(1)
-            CockpitDevice.NAME_BUTTON_2 -> toggleButton(2)
-            CockpitDevice.NAME_BUTTON_3 -> toggleButton(3)
-            CockpitDevice.NAME_BUTTON_4 -> toggleButton(4)
-            CockpitDevice.NAME_BUTTON_5 -> toggleButton(5)
-            CockpitDevice.NAME_BUTTON_6 -> toggleButton(6)
-            CockpitDevice.NAME_BUTTON_7 -> toggleButton(7)
-            CockpitDevice.NAME_BUTTON_8 -> toggleButton(8)
-            CockpitDevice.NAME_BUTTON_9 -> toggleButton(9)
+            CockpitDevice.NAME_BUTTON_1 -> toggleButton(0)
+            CockpitDevice.NAME_BUTTON_2 -> toggleButton(1)
+            CockpitDevice.NAME_BUTTON_3 -> toggleButton(2)
+            CockpitDevice.NAME_BUTTON_4 -> toggleButton(3)
+            CockpitDevice.NAME_BUTTON_5 -> toggleButton(4)
+            CockpitDevice.NAME_BUTTON_6 -> toggleButton(5)
+            CockpitDevice.NAME_BUTTON_7 -> toggleButton(6)
+            CockpitDevice.NAME_BUTTON_8 -> toggleButton(7)
+            CockpitDevice.NAME_BUTTON_9 -> toggleButton(8)
+            CockpitDevice.NAME_BUTTON_ATC -> toggleButton(9)
             CockpitDevice.NAME_BUTTON_A -> toggleButtons(10, 11, value as Boolean)
             CockpitDevice.NAME_BUTTON_D -> toggleButton(12)
             CockpitDevice.NAME_BUTTON_PAUSE -> toggleButton(13)

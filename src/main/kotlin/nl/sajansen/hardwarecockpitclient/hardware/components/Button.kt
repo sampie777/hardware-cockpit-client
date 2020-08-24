@@ -15,6 +15,10 @@ class Button(override val id: Int, override val name: String) : Component {
         return temp
     }
 
+    fun rawValue(): Boolean {
+        return toggled
+    }
+
     override fun set(newRawValue: Int) {
         if (toggled) {
             logger.info("Button value can only be set to TRUE. To turn button off, use reset().")

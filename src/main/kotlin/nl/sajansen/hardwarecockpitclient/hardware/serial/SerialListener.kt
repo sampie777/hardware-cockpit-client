@@ -12,6 +12,7 @@ import java.lang.Integer.min
 import java.nio.ByteBuffer
 import java.util.logging.Logger
 
+@ExperimentalUnsignedTypes
 class SerialListener(private val hardwareDevice: HardwareDevice) : SerialPortDataListener {
     private val logger = Logger.getLogger(SerialListener::class.java.name)
 
