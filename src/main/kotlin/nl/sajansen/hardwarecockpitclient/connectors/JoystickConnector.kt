@@ -201,6 +201,9 @@ class JoystickConnector : Connector {
             )
             else -> return
         }
+
+        joystick1?.flush()
+        joystick2?.flush()
     }
 
     fun toggleButtons(
@@ -222,11 +225,11 @@ class JoystickConnector : Connector {
         async: Boolean = true
     ) {
         joystick.digital[buttonIndex] = Joystick.DIGITAL_ON
-        joystick.flush()
 
         if (async) {
             clearButtonStateAfterTimeout(joystick, buttonIndex, duration)
         } else {
+            joystick.flush()
             Thread.sleep(duration)
             joystick.digital[buttonIndex] = Joystick.DIGITAL_OFF
             joystick.flush()
