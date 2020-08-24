@@ -24,11 +24,13 @@ class Rotary(override val id: Int, override val name: String) : Component {
     }
 
     override fun set(newRawValue: Int) {
-        value += newRawValue
+        value += convertUnsignedToSigned(newRawValue)  // Make signed
         logger.info("Increasing rotary '$name' value to: $value, with: $newRawValue")
 
         sendValueUpdate()
     }
+
+    fun convertUnsignedToSigned(newRawValue: Int) = newRawValue.toUInt().toByte()
 
     override fun reset() {
         logger.info("Resetting rotary '$name' value")
