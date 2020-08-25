@@ -95,9 +95,11 @@ class JoystickConnector : Connector {
             CockpitDevice.NAME_BUTTON_B -> {
                 for (i in 0..6) {
                     toggleButton(joystick1!!, 12, async = false)
+                    Thread.sleep(Config.joystickConnectorButtonToggleWaitBetweenDuration)
                 }
                 for (i in 0..1) {
                     toggleButton(joystick1!!, 13, async = false)
+                    Thread.sleep(Config.joystickConnectorButtonToggleWaitBetweenDuration)
                 }
             }
             CockpitDevice.NAME_BUTTON_C -> {
@@ -114,17 +116,17 @@ class JoystickConnector : Connector {
             CockpitDevice.NAME_BUTTON_D -> toggleButton(joystick1!!, 15)
             CockpitDevice.NAME_BUTTON_PAUSE -> toggleButton(joystick1!!, 16)
 
-            CockpitDevice.NAME_SWITCH_BCN -> toggleButtons(joystick1!!, 17, 18, value as Boolean)
-            CockpitDevice.NAME_SWITCH_LAND -> toggleButtons(joystick1!!, 19, 20, value as Boolean)
-            CockpitDevice.NAME_SWITCH_TAXI -> toggleButtons(joystick1!!, 21, 22, value as Boolean)
-            CockpitDevice.NAME_SWITCH_NAV -> toggleButtons(joystick1!!, 23, 24, value as Boolean)
-            CockpitDevice.NAME_SWITCH_STROBE -> toggleButtons(joystick1!!, 25, 26, value as Boolean)
-            CockpitDevice.NAME_SWITCH_CABIN -> toggleButtons(joystick1!!, 27, 28, value as Boolean)
-            CockpitDevice.NAME_SWITCH_G -> toggleButtons(joystick2!!, 0, 1, value as Boolean)
-            CockpitDevice.NAME_SWITCH_PARKING_BRAKE -> toggleButtons(joystick2!!, 2, 3, value as Boolean)
-            CockpitDevice.NAME_SWITCH_MASTER -> toggleButtons(joystick2!!, 4, 5, value as Boolean)
+            CockpitDevice.NAME_SWITCH_BCN -> toggleSwitch(joystick1!!, 17, 18, value as Boolean)
+            CockpitDevice.NAME_SWITCH_LAND -> toggleSwitch(joystick1!!, 19, 20, value as Boolean)
+            CockpitDevice.NAME_SWITCH_TAXI -> toggleSwitch(joystick1!!, 21, 22, value as Boolean)
+            CockpitDevice.NAME_SWITCH_NAV -> toggleSwitch(joystick1!!, 23, 24, value as Boolean)
+            CockpitDevice.NAME_SWITCH_STROBE -> toggleSwitch(joystick1!!, 25, 26, value as Boolean)
+            CockpitDevice.NAME_SWITCH_CABIN -> toggleSwitch(joystick1!!, 27, 28, value as Boolean)
+            CockpitDevice.NAME_SWITCH_G -> toggleSwitch(joystick2!!, 0, 1, value as Boolean)
+            CockpitDevice.NAME_SWITCH_PARKING_BRAKE -> toggleSwitch(joystick2!!, 2, 3, value as Boolean)
+            CockpitDevice.NAME_SWITCH_MASTER -> toggleSwitch(joystick2!!, 4, 5, value as Boolean)
             CockpitDevice.NAME_SWITCH_LANDING_GEAR -> {
-                toggleButtons(joystick2!!, 6, 7, value as Boolean)
+                toggleSwitch(joystick2!!, 6, 7, value as Boolean)
 
                 joystick2?.analog?.set(
                     Joystick.ANALOG_SLIDER,
@@ -218,6 +220,23 @@ class JoystickConnector : Connector {
     fun setRudder(joystick: Joystick, axis: Int) {
         val rudder = Joystick.ANALOG_MID + (rudderLeft - rudderRight)
         joystick.analog[axis] = rudder
+    }
+
+    fun toggleSwitch(
+        joystick: Joystick,
+        buttonOnIndex: Int,
+        buttonOffIndex: Int,
+        value: Boolean,
+        duration: Long = Config.joystickConnectorButtonToggleDuration,
+        async: Boolean = true
+    ) {
+        if (Config.joystickConnectorSwitchesUseOneButton) {
+            joystick.digital[buttonOnIndex] = if (value) Joystick.DIGITAL_ON else Joystick.DIGITAL_OFF
+            return
+        }
+
+        val buttonIndex = if (value) buttonOnIndex else buttonOffIndex
+        toggleButton(joystick, buttonIndex, duration, async = async)
     }
 
     fun toggleButtons(

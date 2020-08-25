@@ -91,6 +91,7 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
         g2.color = Color(255, 255, 0, 100)
 
         when (component.name) {
+            CockpitDevice.NAME_SWITCH_MASTER -> g2.fillRect(0, 0, size.width, size.height)
             CockpitDevice.NAME_SLIDER_F -> g2.fillOval(0, 0, size.width, size.height)
             else -> when (component) {
                 is Rotary -> g2.fillRect(0, 0, size.width, size.height)

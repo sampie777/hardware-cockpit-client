@@ -26,6 +26,8 @@ object Config {
     var joystickConnectorMaxTrim: Int = 100
     var joystickConnectorTrimAsync: Boolean = false
     var joystickConnectorButtonToggleDuration: Long = 50
+    var joystickConnectorButtonToggleWaitBetweenDuration: Long = 50
+    var joystickConnectorSwitchesUseOneButton: Boolean = false
 
     // HardwareDeviceEmulatorConnector
     var hardwareDeviceEmulatorConnectorEnabled: Boolean = false

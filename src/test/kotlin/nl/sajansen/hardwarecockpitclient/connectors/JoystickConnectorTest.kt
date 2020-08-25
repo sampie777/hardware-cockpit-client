@@ -13,6 +13,8 @@ class JoystickConnectorTest {
     fun before() {
         Config.joystickConnectorMaxTrim = 100
         Config.joystickConnectorButtonToggleDuration = 15
+        Config.joystickConnectorButtonToggleWaitBetweenDuration = 0
+        Config.joystickConnectorSwitchesUseOneButton = false
     }
 
     @Test
@@ -83,6 +85,46 @@ class JoystickConnectorTest {
 
         assertEquals(Joystick.DIGITAL_OFF, joystick.digital[0])
         assertTrue(joystick.isSend)
+    }
+
+    @Test
+    fun testSwitchesUsesOneButton() {
+        Config.joystickConnectorSwitchesUseOneButton = true
+        val joystick = JoystickMock()
+        val connector = JoystickConnector()
+        connector.joystick1 = joystick
+
+        // When
+        connector.toggleSwitch(joystick, 0, 1, true, async = false)
+
+        assertEquals(Joystick.DIGITAL_ON, joystick.digital[0])
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[1])
+        assertFalse(joystick.isSend)
+
+        // When
+        connector.toggleSwitch(joystick, 0, 1, false, async = false)
+
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[0])
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[1])
+        assertFalse(joystick.isSend)
+
+        // When
+        Config.joystickConnectorSwitchesUseOneButton = false
+        connector.toggleSwitch(joystick, 0, 1, true, async = false)
+
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[0])
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[1])
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
+
+        // When
+        Config.joystickConnectorSwitchesUseOneButton = false
+        connector.toggleSwitch(joystick, 0, 1, false, async = false)
+
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[0])
+        assertEquals(Joystick.DIGITAL_OFF, joystick.digital[1])
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
     }
 
     @Test
@@ -175,27 +217,42 @@ class JoystickConnectorTest {
     }
 
     @Test
-    fun testRudderFunctionNeutral() {
+    fun testRudderFunctionChanges() {
         val joystick = JoystickMock()
         val connector = JoystickConnector()
         connector.joystick1 = joystick
         connector.joystick2 = JoystickMock()
 
-        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, 1600)
-        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT, 1600)
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Joystick.ANALOG_MID)
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT, Joystick.ANALOG_MID)
 
+        assertEquals(Joystick.ANALOG_MID, connector.rudderLeft)
+        assertEquals(Joystick.ANALOG_MID, connector.rudderRight)
         assertEquals(Joystick.ANALOG_MID, joystick.analog[Joystick.ANALOG_ROTATION_Z])
         assertTrue(joystick.isSend)
         joystick.isSend = false
 
-        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, 1)
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Joystick.ANALOG_MIN)
 
+        assertEquals(1, connector.rudderLeft)
+        assertEquals(Joystick.ANALOG_MID, connector.rudderRight)
         assertEquals(1, joystick.analog[Joystick.ANALOG_ROTATION_Z])
         assertTrue(joystick.isSend)
         joystick.isSend = false
 
         connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Joystick.ANALOG_MID)
 
+        assertEquals(Joystick.ANALOG_MID, connector.rudderLeft)
+        assertEquals(Joystick.ANALOG_MID, connector.rudderRight)
+        assertEquals(Joystick.ANALOG_MID, joystick.analog[Joystick.ANALOG_ROTATION_Z])
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
+
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Joystick.ANALOG_MIN)
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT, Joystick.ANALOG_MIN)
+
+        assertEquals(Joystick.ANALOG_MIN, connector.rudderLeft)
+        assertEquals(Joystick.ANALOG_MIN, connector.rudderRight)
         assertEquals(Joystick.ANALOG_MID, joystick.analog[Joystick.ANALOG_ROTATION_Z])
         assertTrue(joystick.isSend)
         joystick.isSend = false
