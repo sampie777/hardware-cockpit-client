@@ -55,8 +55,12 @@ class HardwareEmulatorPanel : JPanel(null) {
         createCockpitComponent(CockpitDevice.NAME_SLIDER_FLAPS, Point(1088, 383), Dimension(74, 289)),
         createCockpitComponent(CockpitDevice.NAME_SLIDER_SPOILER, Point(1307, 383), Dimension(74, 289)),
         createCockpitComponent(CockpitDevice.NAME_SLIDER_F, Point(1506, 377), Dimension(107, 107)),
-        createCockpitComponent(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Point(846 - 34, 799 - 58 / 2), Dimension(34, 58)),
-        createCockpitComponent(CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT, Point(846 + 224, 799 - 58 / 2), Dimension(34, 58))
+        createCockpitComponent(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Point(1515, 125), Dimension(30, 38)),
+        createCockpitComponent(
+            CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT,
+            Point(1515 + 140 - 30, 125),
+            Dimension(30, 38)
+        )
     )
 
     companion object {
@@ -75,9 +79,9 @@ class HardwareEmulatorPanel : JPanel(null) {
     private fun Int.horRatio() = (this * widthRatio).toInt()
     private fun Int.verRatio() = (this * heightRatio).toInt()
 
-    private val rudderIndicatorRailLocation = Point(846, 799)
-    private val rudderIndicatorRailSize = Dimension(224, 6)
-    private val rudderIndicatorSize = Dimension(10, 30)
+    private val rudderIndicatorRailLocation = Point(1515, 117)
+    private val rudderIndicatorRailSize = Dimension(140, 1)
+    private val rudderIndicatorSize = Dimension(6, 20)
     private var rudder: Int = 0
     private val rudderLeftComponent = CockpitDevice.components
         .find { it.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT }
@@ -181,7 +185,7 @@ class HardwareEmulatorPanel : JPanel(null) {
         val rudderIndicatorPositionX = map.map(rudder)
 
         g2.stroke = BasicStroke(1F)
-        g2.color = Color(28, 28, 28)
+        g2.color = Color(230, 230, 230)
         g2.fillRect(
             rudderIndicatorRailLocation.x.horRatio(),
             rudderIndicatorRailLocation.y.verRatio(),
@@ -189,12 +193,16 @@ class HardwareEmulatorPanel : JPanel(null) {
             rudderIndicatorRailSize.height.verRatio() + 1
         )
 
-        g2.color = Color(200, 200, 200)
+        g2.color = Color(255, 255, 255)
         g2.fillOval(
             (rudderIndicatorPositionX - rudderIndicatorSize.width / 2).horRatio(),
             (rudderIndicatorRailLocation.y - rudderIndicatorSize.height / 2).verRatio() + 1,
             rudderIndicatorSize.width.horRatio() + 1,
             rudderIndicatorSize.height.verRatio() + 1
         )
+
+        g2.color = Color(255, 255, 255)
+        g2.font = Font("System", Font.BOLD, 12)
+        g2.drawString("RUDDER", 1545.horRatio(), (88 + g2.fontMetrics.height).verRatio())
     }
 }

@@ -70,8 +70,10 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
                 return null
             }
         } else if (component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT || component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT) {
-            if (!isHighlighted) {
-                return getRudderPainting()
+            return if (isHighlighted) {
+                getRudderPainting()
+            } else {
+                null
             }
         } else if (component is Slider) {
             if (!isHighlighted) {
@@ -102,16 +104,21 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
     }
 
     private fun getRudderPainting(): BufferedImage? {
+        val text = if (component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT) "L" else "R"
+
         val (bufferedImageTemp, g2: Graphics2D) = createGraphics(
             size.width,
             size.height,
             BufferedImage.TRANSLUCENT
         )
-
         g2.stroke = BasicStroke(1F)
-        g2.color = Color(139, 139, 139)
+        g2.color = Color(255, 255, 255)
 
-        g2.fillRect(0, 0, size.width, size.height)
+        g2.drawRect(0, 0, size.width - 1, size.height - 1)
+
+        g2.color = Color(255, 255, 255)
+        g2.font = Font("System", Font.PLAIN, 26)
+        g2.drawString(text, (size.width - 1) / 2 - g2.fontMetrics.stringWidth(text) / 2, (size.height - 1) / 2 + g2.fontMetrics.height / 2 - 5)
 
         g2.dispose()
         return bufferedImageTemp
