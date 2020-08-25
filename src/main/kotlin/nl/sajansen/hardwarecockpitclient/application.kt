@@ -13,7 +13,7 @@ import nl.sajansen.hardwarecockpitclient.utils.getCurrentJarDirectory
 import java.awt.EventQueue
 import java.util.logging.Logger
 
-val logger = Logger.getLogger("Application")
+val logger: Logger = Logger.getLogger("Application")
 
 fun main(args: Array<String>) {
     if (args.contains("--help")) {

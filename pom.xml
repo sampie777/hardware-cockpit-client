@@ -6,7 +6,7 @@
 
     <groupId>nl.sajansen</groupId>
     <artifactId>hardware-cockpit-client</artifactId>
-    <version>0.0.0-SNAPSHOT-31</version>
+    <version>0.0.0-SNAPSHOT-32</version>
     <packaging>jar</packaging>
 
     <name>Hardware Cockpit Client</name>
@@ -43,7 +43,7 @@
             <version>${jSerialComm.version}</version>
         </dependency>
 
-        <!-- For Windows keystrokes -->
+        <!-- For Windows keystrokes & Joystick -->
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>

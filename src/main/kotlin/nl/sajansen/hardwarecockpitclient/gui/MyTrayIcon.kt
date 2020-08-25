@@ -4,6 +4,7 @@ package nl.sajansen.hardwarecockpitclient.gui
 import com.fazecast.jSerialComm.SerialPort
 import nl.sajansen.hardwarecockpitclient.ApplicationInfo
 import nl.sajansen.hardwarecockpitclient.config.Config
+import nl.sajansen.hardwarecockpitclient.config.PropertyLoader
 import nl.sajansen.hardwarecockpitclient.connectWithHardware
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
 import nl.sajansen.hardwarecockpitclient.connectors.HardwareDeviceEmulatorConnector
@@ -30,7 +31,26 @@ class MyTrayIcon {
             return
         }
 
-        val keyboardSettingItem = CheckboxMenuItem("Keyboard").also { it ->
+        val settingsFileItem = MenuItem("Settings folder").also {
+            it.addActionListener {
+                logger.info("Opening settings file folder")
+                Config.save()
+
+                try {
+                    Desktop.getDesktop().open(PropertyLoader.getPropertiesFile().parentFile)
+                } catch (e: Exception) {
+                    logger.info("Failed to open settings folder")
+                    e.printStackTrace()
+                    JOptionPane.showMessageDialog(
+                        null,
+                        "Failed to open folder: ${e.localizedMessage}",
+                        "Failure",
+                        JOptionPane.ERROR_MESSAGE
+                    )
+                }
+            }
+        }
+        val keyboardSettingItem = CheckboxMenuItem("Keyboard").also {
             it.state = Config.keyboardConnectorEnabled
             it.addItemListener { _ ->
                 logger.info("Changing keyboardConnectorEnabled to: ${it.state}")
@@ -70,6 +90,7 @@ class MyTrayIcon {
         updateSerialDeviceMenu()
 
         val settingsMenu = Menu("Settings")
+        settingsMenu.add(settingsFileItem)
         settingsMenu.add(serialDeviceMenu)
         settingsMenu.addSeparator()
         settingsMenu.add(keyboardSettingItem)
@@ -81,8 +102,18 @@ class MyTrayIcon {
                 it.isEnabled = false
                 it.name = "Running..."
                 trayIcon?.toolTip = "${ApplicationInfo.name}: running"
+
                 loadConnectors()
-                connectWithHardware()
+                if (connectWithHardware()) {
+                    return@addActionListener
+                }
+
+                JOptionPane.showMessageDialog(
+                    null,
+                    "Failed to connect with hardware device",
+                    "Failed connection",
+                    JOptionPane.ERROR_MESSAGE
+                )
             }
         }
         val emulatorItem = MenuItem("Emulator").also {

@@ -3,7 +3,6 @@ package nl.sajansen.hardwarecockpitclient.gui.emulator
 
 import nl.sajansen.hardwarecockpitclient.config.Config
 import nl.sajansen.hardwarecockpitclient.gui.createGraphics
-import nl.sajansen.hardwarecockpitclient.gui.loadResource
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
 import nl.sajansen.hardwarecockpitclient.hardware.components.*
 import nl.sajansen.hardwarecockpitclient.hardware.components.Button
@@ -12,7 +11,6 @@ import java.awt.*
 import java.awt.image.BufferedImage
 import java.util.*
 import java.util.logging.Logger
-import javax.imageio.ImageIO
 
 class GuiComponent(val component: Component, val location: Point, val size: Dimension) {
     private val logger = Logger.getLogger(GuiComponent::class.java.name)
@@ -26,7 +24,7 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
         if (component is Button) {
             component.set(1)
         } else if (component is Switch) {
-            component.set(if(component.value() as Boolean) 0 else 1)
+            component.set(if (component.value() as Boolean) 0 else 1)
         }
     }
 
@@ -65,29 +63,20 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
             if (!isHighlighted && !component.rawValue()) {
                 return null
             }
-        } else if (component is Rotary) {
-            if (!isHighlighted) {
-                return null
-            }
         } else if (component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT || component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT) {
             return if (isHighlighted) {
                 getRudderPainting()
             } else {
                 null
             }
-        } else if (component is Slider) {
+        } else {
             if (!isHighlighted) {
                 return null
             }
         }
 
-        val (bufferedImageTemp, g2: Graphics2D) = createGraphics(
-            size.width,
-            size.height,
-            BufferedImage.TRANSLUCENT
-        )
+        val (bufferedImageTemp, g2: Graphics2D) = createGraphics(size.width, size.height)
 
-        g2.stroke = BasicStroke(1F)
         g2.color = Color(255, 255, 0, 100)
 
         when (component.name) {
@@ -107,33 +96,22 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
     private fun getRudderPainting(): BufferedImage? {
         val text = if (component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT) "L" else "R"
 
-        val (bufferedImageTemp, g2: Graphics2D) = createGraphics(
-            size.width,
-            size.height,
-            BufferedImage.TRANSLUCENT
-        )
+        val (bufferedImageTemp, g2: Graphics2D) = createGraphics(size.width, size.height)
+        g2.font = Font("System", Font.PLAIN, 26)
         g2.stroke = BasicStroke(1F)
         g2.color = Color(255, 255, 255)
 
         g2.drawRect(0, 0, size.width - 1, size.height - 1)
 
         g2.color = Color(255, 255, 255)
-        g2.font = Font("System", Font.PLAIN, 26)
-        g2.drawString(text, (size.width - 1) / 2 - g2.fontMetrics.stringWidth(text) / 2, (size.height - 1) / 2 + g2.fontMetrics.height / 2 - 5)
+        g2.drawString(
+            text,
+            (size.width - 1) / 2 - g2.fontMetrics.stringWidth(text) / 2,
+            (size.height - 1) / 2 + g2.fontMetrics.height / 2 - 5
+        )
 
         g2.dispose()
         return bufferedImageTemp
-    }
-
-    fun getImage(): BufferedImage {
-        val uri = "/nl/sajansen/hardwarecockpitclient/gui/emulator/components/" +
-                when (component.name) {
-                    CockpitDevice.NAME_BUTTON_PAUSE -> "button_red_large1.png"
-                    else -> throw IllegalArgumentException("No image defined for component: $component")
-                }
-
-        val loadResource = loadResource(uri)
-        return ImageIO.read(loadResource)
     }
 }
 
