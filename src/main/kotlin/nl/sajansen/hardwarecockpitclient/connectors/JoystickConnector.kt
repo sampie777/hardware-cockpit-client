@@ -122,8 +122,8 @@ class JoystickConnector : Connector {
             CockpitDevice.NAME_SWITCH_NAV -> toggleSwitch(joystick1!!, 23, 24, value as Boolean)
             CockpitDevice.NAME_SWITCH_STROBE -> toggleSwitch(joystick1!!, 25, 26, value as Boolean)
             CockpitDevice.NAME_SWITCH_CABIN -> toggleSwitch(joystick1!!, 27, 28, value as Boolean)
-            CockpitDevice.NAME_SWITCH_G -> toggleSwitch(joystick2!!, 0, 1, value as Boolean)
-            CockpitDevice.NAME_SWITCH_PARKING_BRAKE -> toggleSwitch(joystick2!!, 2, 3, value as Boolean)
+            CockpitDevice.NAME_SWITCH_G -> toggleButtons(joystick2!!, 0, 1, value as Boolean)
+            CockpitDevice.NAME_SWITCH_PARKING_BRAKE -> toggleButtons(joystick2!!, 2, 3, value as Boolean)
             CockpitDevice.NAME_SWITCH_MASTER -> toggleSwitch(joystick2!!, 4, 5, value as Boolean)
             CockpitDevice.NAME_SWITCH_LANDING_GEAR -> {
                 toggleSwitch(joystick2!!, 6, 7, value as Boolean)
