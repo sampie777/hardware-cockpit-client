@@ -62,6 +62,8 @@ class JoystickConnector : Connector {
         }
     }
 
+    var rudderLeft: Int = 0
+    var rudderRight: Int = 0
     var elevatorTrimPosition: Int = 0
     private var aileronTrimPosition: Int = 0
     private var rudderTrimPosition: Int = 0
@@ -108,13 +110,12 @@ class JoystickConnector : Connector {
                 elevatorTrimPosition = 0
                 aileronTrimPosition = 0
                 rudderTrimPosition = 0
-                joystick2?.flush()
             }
             CockpitDevice.NAME_BUTTON_D -> toggleButton(joystick1!!, 15)
             CockpitDevice.NAME_BUTTON_PAUSE -> toggleButton(joystick1!!, 16)
 
             CockpitDevice.NAME_SWITCH_BCN -> toggleButtons(joystick1!!, 17, 18, value as Boolean)
-            CockpitDevice.NAME_SWITCH_LAND -> toggleButtons(joystick1!!, 19, 10, value as Boolean)
+            CockpitDevice.NAME_SWITCH_LAND -> toggleButtons(joystick1!!, 19, 20, value as Boolean)
             CockpitDevice.NAME_SWITCH_TAXI -> toggleButtons(joystick1!!, 21, 22, value as Boolean)
             CockpitDevice.NAME_SWITCH_NAV -> toggleButtons(joystick1!!, 23, 24, value as Boolean)
             CockpitDevice.NAME_SWITCH_STROBE -> toggleButtons(joystick1!!, 25, 26, value as Boolean)
@@ -142,6 +143,14 @@ class JoystickConnector : Connector {
             CockpitDevice.NAME_SLIDER_F -> {
                 val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, 0, 1556)
                 joystick1?.analog?.set(Joystick.ANALOG_AXIS_Z, map.map(value as Int))
+            }
+            CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT -> {
+                rudderLeft = value as Int
+                setRudder(joystick1!!, Joystick.ANALOG_ROTATION_Z)
+            }
+            CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT -> {
+                rudderRight = value as Int
+                setRudder(joystick1!!, Joystick.ANALOG_ROTATION_Z)
             }
 
             CockpitDevice.NAME_ROTARY_TRIM_ELEVATOR -> {
@@ -204,6 +213,11 @@ class JoystickConnector : Connector {
 
         joystick1?.flush()
         joystick2?.flush()
+    }
+
+    fun setRudder(joystick: Joystick, axis: Int) {
+        val rudder = Joystick.ANALOG_MID + (rudderLeft - rudderRight)
+        joystick.analog[axis] = rudder
     }
 
     fun toggleButtons(

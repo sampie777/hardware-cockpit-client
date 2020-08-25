@@ -125,4 +125,79 @@ class JoystickConnectorTest {
         assertEquals(-4, connector.elevatorTrimPosition)
         assertEquals(15728, joystick.analog[Joystick.ANALOG_ROTATION_X])
     }
+
+    @Test
+    fun testRudderNeutral() {
+        val joystick = JoystickMock()
+        val connector = JoystickConnector()
+
+        connector.rudderLeft = Joystick.ANALOG_MID
+        connector.rudderRight = Joystick.ANALOG_MID
+        connector.setRudder(joystick, 0)
+
+        assertEquals(Joystick.ANALOG_MID, joystick.analog[0])
+    }
+
+    @Test
+    fun testRudderLeft() {
+        val joystick = JoystickMock()
+        val connector = JoystickConnector()
+
+        connector.rudderLeft = 1
+        connector.rudderRight = Joystick.ANALOG_MID
+        connector.setRudder(joystick, 0)
+
+        assertEquals(1, joystick.analog[0])
+    }
+
+    @Test
+    fun testRudderRight() {
+        val joystick = JoystickMock()
+        val connector = JoystickConnector()
+
+        connector.rudderLeft = Joystick.ANALOG_MID
+        connector.rudderRight = 1
+        connector.setRudder(joystick, 0)
+
+        assertEquals(Joystick.ANALOG_MAX, joystick.analog[0])
+    }
+
+    @Test
+    fun testRudderBrake() {
+        val joystick = JoystickMock()
+        val connector = JoystickConnector()
+
+        connector.rudderLeft = 1
+        connector.rudderRight = 1
+        connector.setRudder(joystick, 0)
+
+        assertEquals(Joystick.ANALOG_MID, joystick.analog[0])
+    }
+
+    @Test
+    fun testRudderFunctionNeutral() {
+        val joystick = JoystickMock()
+        val connector = JoystickConnector()
+        connector.joystick1 = joystick
+        connector.joystick2 = JoystickMock()
+
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, 1600)
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT, 1600)
+
+        assertEquals(Joystick.ANALOG_MID, joystick.analog[Joystick.ANALOG_ROTATION_Z])
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
+
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, 1)
+
+        assertEquals(1, joystick.analog[Joystick.ANALOG_ROTATION_Z])
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
+
+        connector.valueUpdate(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Joystick.ANALOG_MID)
+
+        assertEquals(Joystick.ANALOG_MID, joystick.analog[Joystick.ANALOG_ROTATION_Z])
+        assertTrue(joystick.isSend)
+        joystick.isSend = false
+    }
 }

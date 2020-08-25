@@ -69,6 +69,10 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
             if (!isHighlighted) {
                 return null
             }
+        } else if (component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT || component.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT) {
+            if (!isHighlighted) {
+                return getRudderPainting()
+            }
         } else if (component is Slider) {
             if (!isHighlighted) {
                 return null
@@ -85,15 +89,29 @@ class GuiComponent(val component: Component, val location: Point, val size: Dime
         g2.color = Color(255, 255, 0, 100)
 
         when (component.name) {
-            CockpitDevice.NAME_SWITCH_MASTER -> g2.fillRect(0, 0, size.width, size.height)
-            CockpitDevice.NAME_SLIDER_FLAPS -> g2.fillRect(0, 0, size.width, size.height)
-            CockpitDevice.NAME_SLIDER_SPOILER -> g2.fillRect(0, 0, size.width, size.height)
             CockpitDevice.NAME_SLIDER_F -> g2.fillOval(0, 0, size.width, size.height)
             else -> when (component) {
                 is Rotary -> g2.fillRect(0, 0, size.width, size.height)
+                is Slider -> g2.fillRect(0, 0, size.width, size.height)
                 else -> g2.fillOval(0, 0, size.width, size.height)
             }
         }
+
+        g2.dispose()
+        return bufferedImageTemp
+    }
+
+    private fun getRudderPainting(): BufferedImage? {
+        val (bufferedImageTemp, g2: Graphics2D) = createGraphics(
+            size.width,
+            size.height,
+            BufferedImage.TRANSLUCENT
+        )
+
+        g2.stroke = BasicStroke(1F)
+        g2.color = Color(139, 139, 139)
+
+        g2.fillRect(0, 0, size.width, size.height)
 
         g2.dispose()
         return bufferedImageTemp

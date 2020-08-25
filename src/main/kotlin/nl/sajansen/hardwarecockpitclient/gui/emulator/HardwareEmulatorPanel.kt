@@ -3,6 +3,8 @@ package nl.sajansen.hardwarecockpitclient.gui.emulator
 
 import nl.sajansen.hardwarecockpitclient.gui.loadResource
 import nl.sajansen.hardwarecockpitclient.hardware.CockpitDevice
+import nl.sajansen.hardwarecockpitclient.utils.NumberMap
+import org.flypad.joystick.Joystick
 import java.awt.*
 import java.awt.event.MouseEvent
 import java.awt.event.MouseListener
@@ -52,7 +54,9 @@ class HardwareEmulatorPanel : JPanel(null) {
 
         createCockpitComponent(CockpitDevice.NAME_SLIDER_FLAPS, Point(1088, 383), Dimension(74, 289)),
         createCockpitComponent(CockpitDevice.NAME_SLIDER_SPOILER, Point(1307, 383), Dimension(74, 289)),
-        createCockpitComponent(CockpitDevice.NAME_SLIDER_F, Point(1506, 377), Dimension(107, 107))
+        createCockpitComponent(CockpitDevice.NAME_SLIDER_F, Point(1506, 377), Dimension(107, 107)),
+        createCockpitComponent(CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT, Point(846 - 34, 799 - 58 / 2), Dimension(34, 58)),
+        createCockpitComponent(CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT, Point(846 + 224, 799 - 58 / 2), Dimension(34, 58))
     )
 
     companion object {
@@ -70,6 +74,15 @@ class HardwareEmulatorPanel : JPanel(null) {
 
     private fun Int.horRatio() = (this * widthRatio).toInt()
     private fun Int.verRatio() = (this * heightRatio).toInt()
+
+    private val rudderIndicatorRailLocation = Point(846, 799)
+    private val rudderIndicatorRailSize = Dimension(224, 6)
+    private val rudderIndicatorSize = Dimension(10, 30)
+    private var rudder: Int = 0
+    private val rudderLeftComponent = CockpitDevice.components
+        .find { it.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT }
+    private val rudderRightComponent = CockpitDevice.components
+        .find { it.name == CockpitDevice.NAME_SLIDER_FEET_PEDAL_RIGHT }
 
     private fun setSizeRatio() {
         widthRatio = width / originalSize.width.toDouble()
@@ -126,6 +139,8 @@ class HardwareEmulatorPanel : JPanel(null) {
         drawBackgroundImage(g2)
 
         paintGuiComponents(g2)
+
+        paintRudderIndicator(g2)
     }
 
     private fun drawBackgroundImage(g2: Graphics2D) {
@@ -146,6 +161,40 @@ class HardwareEmulatorPanel : JPanel(null) {
             component.location.y.verRatio(),
             component.size.width.horRatio() + 1,
             component.size.height.verRatio() + 1, null
+        )
+    }
+
+    private fun paintRudderIndicator(g2: Graphics2D) {
+        if (rudderLeftComponent == null || rudderRightComponent == null) {
+            logger.warning("No rudder components found, cannot display rudder indicator")
+            return
+        }
+
+        rudder = Joystick.ANALOG_MID + ((rudderLeftComponent.value() as Int) - (rudderRightComponent.value() as Int))
+
+        val map = NumberMap(
+            rudderIndicatorRailLocation.x,
+            rudderIndicatorRailLocation.x + rudderIndicatorRailSize.width,
+            Joystick.ANALOG_MIN,
+            Joystick.ANALOG_MAX
+        )
+        val rudderIndicatorPositionX = map.map(rudder)
+
+        g2.stroke = BasicStroke(1F)
+        g2.color = Color(28, 28, 28)
+        g2.fillRect(
+            rudderIndicatorRailLocation.x.horRatio(),
+            rudderIndicatorRailLocation.y.verRatio(),
+            rudderIndicatorRailSize.width.horRatio() + 1,
+            rudderIndicatorRailSize.height.verRatio() + 1
+        )
+
+        g2.color = Color(200, 200, 200)
+        g2.fillOval(
+            (rudderIndicatorPositionX - rudderIndicatorSize.width / 2).horRatio(),
+            (rudderIndicatorRailLocation.y - rudderIndicatorSize.height / 2).verRatio() + 1,
+            rudderIndicatorSize.width.horRatio() + 1,
+            rudderIndicatorSize.height.verRatio() + 1
         )
     }
 }

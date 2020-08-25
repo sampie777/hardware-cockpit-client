@@ -7,6 +7,7 @@ import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialListener
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialOperationMode
 import nl.sajansen.hardwarecockpitclient.utils.NumberMap
 import nl.sajansen.hardwarecockpitclient.utils.NumberMapMode
+import org.flypad.joystick.Joystick
 import java.util.logging.Logger
 
 @Suppress("MemberVisibilityCanBePrivate")
@@ -84,8 +85,8 @@ object CockpitDevice : HardwareDevice {
         Slider(100, NAME_SLIDER_FLAPS),
         Slider(104, NAME_SLIDER_SPOILER, NumberMap(0, 16383, 1, 9, mode = NumberMapMode.LINEAR)),
         Slider(105, NAME_SLIDER_F),
-//        Slider(106, NAME_SLIDER_FEET_PEDAL_LEFT),
-//        Slider(107, NAME_SLIDER_FEET_PEDAL_RIGHT),
+        Slider(106, NAME_SLIDER_FEET_PEDAL_LEFT, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MID, 100, 1557)),
+        Slider(107, NAME_SLIDER_FEET_PEDAL_RIGHT, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MID, 0, 1557)),
 
         Rotary(11, NAME_ROTARY_TRIM_ELEVATOR),
         Rotary(12, NAME_ROTARY_TRIM_AILERONS),
