@@ -13,4 +13,6 @@ interface HardwareDevice {
 
     fun connect(deviceName: String, baudRate: Int): Boolean
     fun disconnect() {}
+
+    fun getUpdateData(): ByteArray = ByteArray(0)
 }

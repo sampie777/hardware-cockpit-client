@@ -99,6 +99,25 @@ object CockpitDevice : HardwareDevice {
     )
 
     override var operationMode: SerialOperationMode = SerialOperationMode.OPERATION_MODE_SIMULATOR
+
+    val updateData = CockpitDeviceFeedbackData(
+        operationMode.id.toUByte(),
+        0u,
+        0u,
+        80u,
+        0u,
+        1u,
+        0,
+        16383,
+        16383,
+        16383,
+        3u,
+        0u,
+        0u,
+        0,
+        0,
+        0u
+    )
     private var comPort: SerialPort? = null
     override fun getComPort() = comPort
 
@@ -136,5 +155,9 @@ object CockpitDevice : HardwareDevice {
             comPort?.readBytes(byteBuffer, byteBuffer.size.toLong())
         }
         logger.info("Com port buffer cleared")
+    }
+
+    override fun getUpdateData(): ByteArray {
+        return updateData.toByteArray()
     }
 }
