@@ -1,15 +1,11 @@
 package nl.sajansen.hardwarecockpitclient.gui
 
 
-import com.fazecast.jSerialComm.SerialPort
 import nl.sajansen.hardwarecockpitclient.ApplicationInfo
 import nl.sajansen.hardwarecockpitclient.config.Config
-import nl.sajansen.hardwarecockpitclient.config.PropertyLoader
 import nl.sajansen.hardwarecockpitclient.connectWithHardware
 import nl.sajansen.hardwarecockpitclient.connectors.ConnectorRegister
 import nl.sajansen.hardwarecockpitclient.connectors.HardwareDeviceEmulatorConnector
-import nl.sajansen.hardwarecockpitclient.connectors.JoystickConnector
-import nl.sajansen.hardwarecockpitclient.connectors.KeyboardConnector
 import nl.sajansen.hardwarecockpitclient.gui.emulator.HardwareEmulatorFrame
 import nl.sajansen.hardwarecockpitclient.loadConnectors
 import java.awt.*
@@ -22,7 +18,7 @@ class MyTrayIcon {
     private val logger = Logger.getLogger(MyTrayIcon::class.java.name)
 
     private var trayIcon: TrayIcon? = null
-    private val serialDeviceMenu = Menu("Serial device")
+    private val startItem = MenuItem("Start")
 
     fun show() {
         //Check the SystemTray is supported
@@ -31,89 +27,10 @@ class MyTrayIcon {
             return
         }
 
-        val settingsFileItem = MenuItem("Settings folder").also {
-            it.addActionListener {
-                logger.info("Opening settings file folder")
-                Config.save()
-
-                try {
-                    Desktop.getDesktop().open(PropertyLoader.getPropertiesFile().parentFile)
-                } catch (e: Exception) {
-                    logger.info("Failed to open settings folder")
-                    e.printStackTrace()
-                    JOptionPane.showMessageDialog(
-                        null,
-                        "Failed to open folder: ${e.localizedMessage}",
-                        "Failure",
-                        JOptionPane.ERROR_MESSAGE
-                    )
-                }
-            }
-        }
-        val keyboardSettingItem = CheckboxMenuItem("Keyboard").also {
-            it.state = Config.keyboardConnectorEnabled
-            it.addItemListener { _ ->
-                logger.info("Changing keyboardConnectorEnabled to: ${it.state}")
-                Config.keyboardConnectorEnabled = it.state
-                Config.save()
-
-                // Live reload, if the hardware is running
-                ConnectorRegister.connectors
-                    .filterIsInstance<KeyboardConnector>()
-                    .toTypedArray()
-                    .forEach { connector -> connector.disable() }
-
-                if (it.state) {
-                    KeyboardConnector().enable()
-                }
-            }
-        }
-        val joystickSettingItem = CheckboxMenuItem("Joystick").also {
-            it.state = Config.joystickConnectorEnabled
-            it.addItemListener { _ ->
-                logger.info("Changing joystickConnectorEnabled to: ${it.state}")
-                Config.joystickConnectorEnabled = it.state
-                Config.save()
-
-                // Live reload, if the hardware is running
-                ConnectorRegister.connectors
-                    .filterIsInstance<JoystickConnector>()
-                    .toTypedArray()
-                    .forEach { connector -> connector.disable() }
-
-                if (it.state) {
-                    JoystickConnector().enable()
-                }
-            }
-        }
-
-        updateSerialDeviceMenu()
-
-        val settingsMenu = Menu("Settings")
-        settingsMenu.add(settingsFileItem)
-        settingsMenu.add(serialDeviceMenu)
-        settingsMenu.addSeparator()
-        settingsMenu.add(keyboardSettingItem)
-        settingsMenu.add(joystickSettingItem)
-
         // Create a pop-up menu components
-        val startItem = MenuItem("Start").also {
-            it.addActionListener { _ ->
-                it.isEnabled = false
-                it.name = "Running..."
-                trayIcon?.toolTip = "${ApplicationInfo.name}: running"
-
-                loadConnectors()
-                if (connectWithHardware()) {
-                    return@addActionListener
-                }
-
-                JOptionPane.showMessageDialog(
-                    null,
-                    "Failed to connect with hardware device",
-                    "Failed connection",
-                    JOptionPane.ERROR_MESSAGE
-                )
+        startItem.also {
+            it.addActionListener {
+                startConnection()
             }
         }
         val emulatorItem = MenuItem("Emulator").also {
@@ -157,7 +74,7 @@ class MyTrayIcon {
         val popup = PopupMenu()
         popup.add(startItem)
         popup.add(emulatorItem)
-        popup.add(settingsMenu)
+        popup.add(SettingsMenu())
         popup.add(infoItem)
         popup.addSeparator()
         popup.add(exitItem)
@@ -175,34 +92,28 @@ class MyTrayIcon {
             logger.severe("TrayIcon could not be added to system tray")
             e.printStackTrace()
         }
+
+        if (Config.connectOnStartUp) {
+            logger.info("Auto connecting (on start up)")
+            startConnection()
+        }
     }
 
-    private fun updateSerialDeviceMenu() {
-        serialDeviceMenu.removeAll()
+    private fun startConnection() {
+        startItem.isEnabled = false
+        startItem.name = "Running..."
+        trayIcon?.toolTip = "${ApplicationInfo.name}: running"
 
-        SerialPort.getCommPorts().forEach { port ->
-            val deviceItem = CheckboxMenuItem("[${port.systemPortName}]   ${port.descriptivePortName}")
-            deviceItem.state = Config.hardwareDeviceComName == port.descriptivePortName
-            deviceItem.addItemListener {
-                logger.info("Setting new hardware device to: ${port.descriptivePortName}")
-                Config.hardwareDeviceComName = port.descriptivePortName
-                Config.save()
-
-                updateSerialDeviceMenu()
-            }
-
-            serialDeviceMenu.add(deviceItem)
+        loadConnectors()
+        if (connectWithHardware()) {
+            return
         }
 
-        serialDeviceMenu.addSeparator()
-
-        CheckboxMenuItem("Enable connection").also {
-            it.state = Config.hardwareDeviceConnect
-            it.addItemListener { _ ->
-                Config.hardwareDeviceConnect = it.state
-                Config.save()
-            }
-            serialDeviceMenu.add(it)
-        }
+        JOptionPane.showMessageDialog(
+            null,
+            "Failed to connect with hardware device",
+            "Failed connection",
+            JOptionPane.ERROR_MESSAGE
+        )
     }
 }

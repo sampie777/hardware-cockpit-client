@@ -15,6 +15,7 @@ object Config {
     var asynchronousUpdates: Boolean = true
     var rotaryMinUpdateInterval: Long = 100
     var ignoreWindowsPlatformCheck: Boolean = false
+    var connectOnStartUp: Boolean = false
 
     // KeyboardConnector
     var keyboardConnectorEnabled: Boolean = false
