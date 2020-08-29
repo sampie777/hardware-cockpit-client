@@ -139,12 +139,10 @@ class JoystickConnector : Connector {
                 joystick1?.analog?.set(Joystick.ANALOG_AXIS_X, map.map(value as Int))
             }
             CockpitDevice.NAME_SLIDER_SPOILER -> {
-                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, 0, 16383)
-                joystick1?.analog?.set(Joystick.ANALOG_AXIS_Y, map.map(value as Int))
+                joystick1?.analog?.set(Joystick.ANALOG_AXIS_Y, value as Int)
             }
             CockpitDevice.NAME_SLIDER_F -> {
-                val map = NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, 0, 1556)
-                joystick1?.analog?.set(Joystick.ANALOG_AXIS_Z, map.map(value as Int))
+                joystick1?.analog?.set(Joystick.ANALOG_AXIS_Z, value as Int)
             }
             CockpitDevice.NAME_SLIDER_FEET_PEDAL_LEFT -> {
                 rudderLeft = value as Int

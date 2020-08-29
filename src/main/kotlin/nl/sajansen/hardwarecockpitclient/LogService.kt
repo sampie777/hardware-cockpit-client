@@ -18,15 +18,40 @@ object LogService {
 
     private var logFile: File? = null
     private var logFileHandler: FileHandler? = null
+    private val applicationLogger = Logger.getLogger("")
 
     var logBuffer = ArrayList<LogRecord>()
 
     @Throws(IOException::class, IllegalAccessException::class)
     fun setup(args: Array<String>) {
-        if (!Config.enableApplicationLoggingToFile) {
-            logger.info("File logging is disabled")
+
+        if (args.contains("--disable-logging")) {
+            logger.info("Disabling logging")
+            applicationLogger.handlers.forEach {
+                applicationLogger.removeHandler(it)
+            }
             return
         }
+
+        if (Config.enableApplicationLoggingToFile) {
+            setupFileLogging()
+        } else {
+            logger.info("File logging is disabled")
+        }
+
+        // Set log level
+        if (args.contains("-v")) {
+            logger.info("Debug logging turned on")
+
+            applicationLogger.level = Level.FINE
+            applicationLogger.handlers.forEach {
+                it.level = Level.FINE
+            }
+        }
+    }
+
+    private fun setupFileLogging() {
+        logger.fine("Setting up file logging")
 
         // Create logging directory
         val logDirectoryPath = Paths.get(System.getProperty("java.io.tmpdir"), "HardwareCockpitClient")
@@ -47,16 +72,7 @@ object LogService {
 
         // Assign file logger to application logger
         // Logger used by all the classes in this application
-        val applicationLogger = Logger.getLogger("")
         applicationLogger.addHandler(logFileHandler)
-
-        // Set log level
-        if (args.contains("-v")) {
-            applicationLogger.level = Level.FINER
-            logger.info("Debug logging turned on")
-        } else {
-            applicationLogger.level = Level.INFO
-        }
 
         logger.fine("Logging to file: " + logFile!!.absolutePath)
 

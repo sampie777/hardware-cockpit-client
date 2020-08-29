@@ -23,6 +23,8 @@ fun main(args: Array<String>) {
                --help           Show this message
                --headless       Start application without a GUI (system tray icon)
                --disconnect     Don't connect with the hardware
+               -v               Verbose logging
+               --disable-logging Disable logging completely
                
                Connectors:
                --joystick       Enable joystick connector

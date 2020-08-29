@@ -41,6 +41,8 @@ Hardware  --USB-->  SerialListener (-> HardwareDevice) -> Component -> Connector
 - `--help` Prints a list of available commands
 - `--headless` Start the application without the GUI (system tray icon)
 - `--disconnect` Disable connection with hardware
+- `-v` Verbose logging
+- `--disable-logging` Disable logging completely
 - `--joystick` Enable joystick controller
 - `--keyboard` Enable keyboard controller
 - `--emulator` Enable hardware emulator (opens in a new window)

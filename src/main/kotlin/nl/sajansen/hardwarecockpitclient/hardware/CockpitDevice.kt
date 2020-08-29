@@ -6,7 +6,6 @@ import nl.sajansen.hardwarecockpitclient.hardware.components.*
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialListener
 import nl.sajansen.hardwarecockpitclient.hardware.serial.SerialOperationMode
 import nl.sajansen.hardwarecockpitclient.utils.NumberMap
-import nl.sajansen.hardwarecockpitclient.utils.NumberMapMode
 import org.flypad.joystick.Joystick
 import java.util.logging.Logger
 
@@ -83,10 +82,10 @@ object CockpitDevice : HardwareDevice {
         Switch(26, NAME_SWITCH_LANDING_GEAR),
 
         Slider(100, NAME_SLIDER_FLAPS),
-        Slider(104, NAME_SLIDER_SPOILER, NumberMap(0, 16383, 1, 9, mode = NumberMapMode.LINEAR)),
-        Slider(105, NAME_SLIDER_F),
-        Slider(106, NAME_SLIDER_FEET_PEDAL_LEFT, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MID, 100, 1557)),
-        Slider(107, NAME_SLIDER_FEET_PEDAL_RIGHT, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MID, 0, 1557)),
+        Slider(104, NAME_SLIDER_SPOILER, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, 1, 9)),
+        Slider(105, NAME_SLIDER_F, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MAX, 0, 1481)),
+        Slider(106, NAME_SLIDER_FEET_PEDAL_LEFT, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MID, 300, 1481)),
+        Slider(107, NAME_SLIDER_FEET_PEDAL_RIGHT, NumberMap(Joystick.ANALOG_MIN, Joystick.ANALOG_MID, 0, 1481)),
 
         Rotary(11, NAME_ROTARY_TRIM_ELEVATOR),
         Rotary(12, NAME_ROTARY_TRIM_AILERONS),
