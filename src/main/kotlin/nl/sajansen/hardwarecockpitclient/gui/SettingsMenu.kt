@@ -45,7 +45,7 @@ class SettingsMenu : Menu("Settings") {
         }
         val autoStartItem = CheckboxMenuItem("Connect on start").also {
             it.state = Config.connectOnStartUp
-            it.addActionListener { _ ->
+            it.addItemListener { _ ->
                 logger.info("Change connect on start setting")
                 Config.connectOnStartUp = it.state
                 Config.save()

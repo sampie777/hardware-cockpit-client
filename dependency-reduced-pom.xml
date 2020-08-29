@@ -4,8 +4,13 @@
   <groupId>nl.sajansen</groupId>
   <artifactId>hardware-cockpit-client</artifactId>
   <name>Hardware Cockpit Client</name>
-  <version>0.0.0-SNAPSHOT-34</version>
+  <version>0.0.0-SNAPSHOT-37</version>
   <url>https://github.com/sampie777/hardware-cockpit-client</url>
+  <scm>
+    <connection>scm:svn:http://127.0.0.1/dummy</connection>
+    <developerConnection>scm:svn:https://127.0.0.1/dummy</developerConnection>
+    <url>http://127.0.0.1/dummy</url>
+  </scm>
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
@@ -15,6 +20,14 @@
         <directory>src/main/resources</directory>
       </resource>
     </resources>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>3.0.0-M1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -142,6 +155,10 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>3.0.0-M1</version>
       </plugin>
     </plugins>
   </build>

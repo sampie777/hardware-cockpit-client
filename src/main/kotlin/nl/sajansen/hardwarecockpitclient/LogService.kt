@@ -47,6 +47,8 @@ object LogService {
             applicationLogger.handlers.forEach {
                 it.level = Level.FINE
             }
+        } else {
+            applicationLogger.level = Level.INFO
         }
     }
 
