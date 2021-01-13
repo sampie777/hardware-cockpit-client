@@ -5,7 +5,7 @@
 
     <groupId>nl.sajansen</groupId>
     <artifactId>hardware-cockpit-client</artifactId>
-    <version>0.0.0-SNAPSHOT-37</version>
+    <version>0.0.0-SNAPSHOT-38</version>
     <packaging>jar</packaging>
 
     <name>Hardware Cockpit Client</name>
